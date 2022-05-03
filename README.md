@@ -1,70 +1,148 @@
-# Getting Started with Create React App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-## Available Scripts
+# 说明：
 
-In the project directory, you can run:
+整个项目的后端接口都是json-server做的，启动的时候请开启8000端口。
 
-### `npm start`
+在src目录下启动，
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+命令：
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+json-server --watch .\db.json -p 8000
 
-### `npm test`
+更多命令参见官网：
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-### `npm run build`
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+# 第一天
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## 1.Layout组件高度
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+对照控制台看下，输出标签的类名。然后自己手动把高度改成和body一样高就行了
 
-### `npm run eject`
+## 2.侧边栏
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+### 滚动条：
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```js
+/* 设置滚动条样式 */
+::-webkit-scrollbar {width:5px;height:5px;position:absolute;}
+::-webkit-scrollbar-thumb {background-color:#1890ff}
+::-webkit-scrollbar-track {background-color:#ddd}
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+侧边框展开多了，我们自己用个容器包住，自己overflow:auto
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+### Menu
 
-## Learn More
+我的Menu是新版本，用的是<Menu items={[...]} /> 的简写方式。我用的方法是：
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+- 获取后台导航数组
+- 然后新建一个数组装items
+- 根据后台导航数组编写自己的items就行。
+- 因为最深就只有两级，也不用递归。
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```js
+//menu即为获取到的后台导航数组
+const renderMenu = (menu) => {
+        let menuList = []
+        menu.forEach(m => {
+            //有第二级
+            if (m.children.length > 0) {
+                let children = []
+                m.children.forEach(c => {
+                    //pagepermisson是和后台的约定，必须为1才展示
+                    if (c.pagepermisson === 1) {
+                        children.push(getItem(c.title, c.key))
+                    }
+                })
+                //iconList是key和icon的映射表,后面有提到
+                //getItem是创建items对象的方法,后面有提到
+                menuList.push(getItem(m.title, m.key, iconList[m.key], children))
+            } else {
+                menuList.push(getItem(m.title, m.key, iconList[m.key]))
+            }
+        })
+        return menuList;
+    }
+```
 
-### Code Splitting
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
 
-### Analyzing the Bundle Size
+### 图标：
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+这个是我创建items用的函数，
 
-### Making a Progressive Web App
+```js
+//创建Menu子项
+function getItem(label, key, icon, children, type) {
+    return {
+        key,
+        icon,
+        children,
+        label,
+        type,
+    };
+}
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+后台显然不知道我们需要用哪个icon，我们自己写个映射表就行
 
-### Advanced Configuration
+```js
+//key和图标映射表
+const iconList = {
+    "/home": <HomeOutlined />,
+    "/user-manage": <UserOutlined />,
+    "/user-manage/list": <LockOutlined />,
+    "/right-manage": <UserOutlined />,
+    "/right-manage/role/list": <UserOutlined />,
+    "/right-manage/right/list": <UserOutlined />
+}
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+这里的key就是后台导航数组的key喔，很方便就可以取出来
 
-### Deployment
+## 3.权限管理
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+主要是Table组件
 
-### `npm run build` fails to minify
+### render：
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+![image-20220504003517027](https://picture-feng.oss-cn-chengdu.aliyuncs.com/img/image-20220504003517027.png)
+
+复杂数据都会用到喔。
+
+columns数组里面的render，
+
+### 树形表格：
+
+表格支持树形数据的展示，当数据中有 `children` 字段时会自动展示为树形表格。
+
+我们的datasource里恰好有这个属性喔。就不用自己配置数据了。
+
+
+
+### Patch：
+
+传送门：
+
+[PATCH和PUT方法的区别？ - SegmentFault 思否](https://segmentfault.com/q/1010000005685904)
+
+## 用户管理：
+
+### rowKey：
+
+dataSource每行都应该有key喔，之前的权限管理恰好后台传过来的数据有key。后台没有的话，我们可以用
+
+rowKey属性来指定key。
+
+![image-20220504010804765](https://picture-feng.oss-cn-chengdu.aliyuncs.com/img/image-20220504010804765.png)
+
+```jsx
+		<Table
+            dataSource={dataSource}
+            columns={columns}
+            rowKey={(item)=>item.id}
+        />
+```
+
