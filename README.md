@@ -128,9 +128,11 @@ columns数组里面的render，
 
 [PATCH和PUT方法的区别？ - SegmentFault 思否](https://segmentfault.com/q/1010000005685904)
 
-## 用户管理：
+# 第二天
 
-### rowKey：
+
+
+## rowKey：
 
 dataSource每行都应该有key喔，之前的权限管理恰好后台传过来的数据有key。后台没有的话，我们可以用
 
@@ -146,3 +148,96 @@ rowKey属性来指定key。
         />
 ```
 
+## antD里的 default属性：
+
+一般antD里加了default属性表示是受控组件，没加表示非受控组件。
+
+## 树形组件
+
+加了checkStrictly属性后onCheck里面的参数有变化。
+
+## 用户权限管理状态：
+
+用户权限管理这块，状态有很多，不要绕晕了。我都写了很详细的注释，代码里面更详细
+
+
+
+## 同步：
+
+useState方法返回的set函数，不像setState一样有第二个回调函数。需要用set函数达到setState第二个回调函数的效果，
+
+直接放在宏任务setTimeout里面就行。
+
+## 表格过滤
+
+官网的参数看的不怎么懂。
+
+有两个属性就行了。都写在columns表格列中。
+
+第一个属性是filters,这个是一个数组，数组里面有很多个对象。
+
+```js
+filters: [
+      {
+        text: 'Joe',
+        value: 'Joe',
+      },
+      {
+        text: 'Jim',
+        value: 'Jim',
+      },
+      {
+        text: 'Submenu',
+        value: 'Submenu',
+        children: [
+          {
+            text: 'Green',
+            value: 'Green',
+          },
+          {
+            text: 'Black',
+            value: 'Black',
+          },
+        ],
+      },
+    ],
+```
+
+### text：
+
+![image-20220505001921580](https://picture-feng.oss-cn-chengdu.aliyuncs.com/img/image-20220505001921580.png)
+
+### value：
+
+这个和第二个属性有关
+
+### 第二个属性
+
+onFilter,这个属性是一个函数，接收两个参数。在里面写我们的筛选逻辑
+
+第一个参数就是，之前的那个value.
+
+第二个参数就是每行每行的数据，和render的那个item是一个意思
+
+```js
+ onFilter: (value, item) => item.name.indexOf(value) === 0,
+```
+
+## 发请求更新数据？
+
+- 方案1 先在页面更新，再发送请求更新后台，缺点整理数据麻烦
+- 方案2 发送请求更新成功后，再次发送请求得到最新数据,缺点要发两次请求.
+
+  不知道哪种用的多一点
+
+## 粒子动画
+
+传送门：
+
+[(26条消息) 【前端react 粒子特效】_꧁༺龙小九༻ ꧂的博客-CSDN博客_前端粒子动画](https://blog.csdn.net/weixin_54127208/article/details/124380211?utm_medium=distribute.pc_relevant.none-task-blog-2~default~baidujs_baidulandingword~default-1.pc_relevant_paycolumn_v3&spm=1001.2101.3001.4242.2&utm_relevant_index=4)
+
+[tsParticles | Samples | JavaScript Particles, Confetti and Fireworks animations for your website](https://particles.js.org/samples/index.html#preset)
+
+我随便找了一个：
+
+<img src="https://picture-feng.oss-cn-chengdu.aliyuncs.com/img/147.gif" style="zoom: 100%"></img>

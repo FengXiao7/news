@@ -10,25 +10,7 @@
       "roleId": 1
     },
     {
-      "username": "铁锤",
-      "password": "123",
-      "roleState": true,
-      "default": false,
-      "region": "亚洲",
-      "roleId": 2,
-      "id": 2
-    },
-    {
-      "username": "钢蛋",
-      "password": "123",
-      "roleState": true,
-      "default": false,
-      "region": "南极洲",
-      "roleId": 2,
-      "id": 3
-    },
-    {
-      "username": "诸葛山珍",
+      "username": "诸葛山珍1",
       "password": "123",
       "roleState": true,
       "default": false,
@@ -41,22 +23,13 @@
       "password": "123",
       "roleState": true,
       "default": false,
-      "region": "南极洲",
-      "roleId": 3,
+      "region": "亚洲",
+      "roleId": 2,
       "id": 5
     },
     {
-      "username": "轩辕翠花",
-      "password": "123",
-      "roleState": true,
-      "default": false,
-      "region": "南极洲",
-      "roleId": 3,
-      "id": 6
-    },
-    {
-      "username": "司马海味",
-      "password": "123",
+      "username": "司马",
+      "password": "1235",
       "roleState": true,
       "default": false,
       "region": "亚洲",
@@ -64,12 +37,12 @@
       "id": 7
     },
     {
-      "username": "咕噜墩子",
-      "password": "123",
-      "roleState": true,
+      "username": "冯小7",
+      "password": "1235",
+      "region": "",
+      "roleId": 1,
+      "roleState": false,
       "default": false,
-      "region": "亚洲",
-      "roleId": 3,
       "id": 8
     }
   ],

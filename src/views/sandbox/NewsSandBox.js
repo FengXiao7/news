@@ -7,7 +7,7 @@ import Nopermission from './nopermission/Nopermission'
 import RightList from './right-manage/RightList'
 import RoleList from './right-manage/RoleList'
 import UserList from './user-manage/UserList'
-// import Sider from '../../components/Sider'
+// import Sider from '../../components/test'
 
 //css
 import './NewsSandBox.css'

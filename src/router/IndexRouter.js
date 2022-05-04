@@ -1,10 +1,10 @@
 import React from 'react'
-import {HashRouter,Redirect,Route, Switch} from 'react-router-dom'
+import {BrowserRouter,Redirect,Route, Switch} from 'react-router-dom'
 import Login from '../views/login/Login'
 import NewsSandBox from '../views/sandbox/NewsSandBox'
 export default function IndexRouter() {
     return (
-        <HashRouter>
+        <BrowserRouter>
             <Switch>
                 <Route path="/login" component={Login}/>
                 <Route path="/" render={()=>
@@ -13,6 +13,6 @@ export default function IndexRouter() {
                     <Redirect to="/login"/>
                 }/>
             </Switch>
-        </HashRouter>
+        </BrowserRouter>
     )
 }
