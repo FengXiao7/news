@@ -64,13 +64,13 @@ export default function RoleList() {
     ]
     //获得表格数据源
     useEffect(() => {
-        axios.get("http://localhost:8000/roles").then(res => {
+        axios.get("/roles").then(res => {
             setDataSource(res.data)
         })
     }, [])
     //获得权限数据源
     useEffect(() => {
-        axios.get("http://localhost:8000/rights?_embed=children").then(res => {
+        axios.get("/rights?_embed=children").then(res => {
             setRightList(res.data)
         })
     }, [])
@@ -78,7 +78,7 @@ export default function RoleList() {
     //删除回调,button使用
     const deleteMethod = (item) => {
         setDataSource(dataSource.filter(d => d.id !== item.id))
-        axios.delete(`http://localhost:8000/roles/${item.id}`)
+        axios.delete(`/roles/${item.id}`)
     }
     //更改权限回调,树形组件使用.每点一次树形组件，都会触发该回调
     //保证currentRight都是最新的
@@ -103,7 +103,7 @@ export default function RoleList() {
             // 同步数据源
             setDataSource(newDataSource)
             //后台同步
-            axios.patch(`http://localhost:8000/roles/${currentID}`, {
+            axios.patch(`/roles/${currentID}`, {
                 rights: currentRight
             })
         }

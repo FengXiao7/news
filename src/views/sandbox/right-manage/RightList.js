@@ -73,7 +73,7 @@ export default function RightList() {
             //页面删除
             setDataSource(dataSource.filter(d => d.id !== item.id))
             //后台删除
-            axios.delete(`http://localhost:8000/rights/${item.id}`)
+            axios.delete(`/rights/${item.id}`)
         } else {
             //层级为2
             // 先找到父级
@@ -81,7 +81,7 @@ export default function RightList() {
             list[0].children = list[0].children.filter(c => c.id !== item.id)
             setDataSource([...dataSource])
             //后台删除
-            axios.delete(`http://localhost:8000/children/${item.id}`)
+            axios.delete(`/children/${item.id}`)
 
         }
 
@@ -94,11 +94,11 @@ export default function RightList() {
         setDataSource([...dataSource])
 
         if (item.grade === 1) {
-            axios.patch(`http://localhost:8000/rights/${item.id}`, {
+            axios.patch(`/rights/${item.id}`, {
                 pagepermisson: item.pagepermisson
             })
         } else {
-            axios.patch(`http://localhost:8000/children/${item.id}`, {
+            axios.patch(`/children/${item.id}`, {
                 pagepermisson: item.pagepermisson
             })
         }
@@ -106,7 +106,7 @@ export default function RightList() {
 
     //获取数据
     useEffect(() => {
-        axios.get("http://localhost:8000/rights?_embed=children")
+        axios.get("/rights?_embed=children")
             .then(res => {
                 // 把childen属性为[]变为空串，以免树形化有bug
                 let list = res.data

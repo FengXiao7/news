@@ -27,6 +27,8 @@ export default function UserList() {
     const addForm = useRef(null)
     //更新用户表单Ref
     const updateForm = useRef(null)
+    //所需用户权限
+    const { roleId, region, username } = JSON.parse(localStorage.getItem("token"))
     //表格列
     const columns = [
         {
@@ -34,21 +36,21 @@ export default function UserList() {
             dataIndex: 'region',
             width: 100,
             filters: [
-                ...regionData.map(r=>{
-                    return{
-                        text:r.title,
-                        value:r.value
+                ...regionData.map(r => {
+                    return {
+                        text: r.title,
+                        value: r.value
                     }
-                }),{
-                    text:"全球",
-                    value:"全球"
+                }), {
+                    text: "全球",
+                    value: "全球"
                 }
-              ],
-            onFilter:(value,item)=>{
-                if(value==='全球'){
-                    return item.region===""
+            ],
+            onFilter: (value, item) => {
+                if (value === '全球') {
+                    return item.region === ""
                 }
-                return item.region===value
+                return item.region === value
             },
             render: (region) => {
                 return <b>{region === '' ? '全球' : region}</b>
@@ -59,16 +61,16 @@ export default function UserList() {
             title: '角色名称',
             dataIndex: 'role',
             width: 100,
-            filters:[
-                ...roles.map(r=>{
-                    return{
-                        text:r.roleName,
-                        value:r.roleName
+            filters: [
+                ...roles.map(r => {
+                    return {
+                        text: r.roleName,
+                        value: r.roleName
                     }
                 })
             ],
-            onFilter:(value,item)=>{
-                return item.role.roleName===value
+            onFilter: (value, item) => {
+                return item.role.roleName === value
             },
             render: (role) => {
                 return role.roleName
@@ -120,7 +122,7 @@ export default function UserList() {
     const handleChange = (item) => {
         item.roleState = !item.roleState
         setDataSource([...dataSource])
-        axios.patch(`http://localhost:8000/users/${item.id}`, {
+        axios.patch(`/users/${item.id}`, {
             roleState: item.roleState
         })
     }
@@ -140,7 +142,7 @@ export default function UserList() {
     const deleteMethod = (item) => {
         setDataSource(dataSource.filter(data => data.id !== item.id))
 
-        axios.delete(`http://localhost:8000/users/${item.id}`)
+        axios.delete(`/users/${item.id}`)
     }
     //确认添加用户回调
     const addFormOk = () => {
@@ -150,7 +152,7 @@ export default function UserList() {
             // 重置表单
             addForm.current.resetFields()
             // 先向后台发请求，id自增
-            axios.post('http://localhost:8000/users', {
+            axios.post('/users', {
                 ...value,
                 "roleState": true,
                 "default": false,
@@ -189,9 +191,15 @@ export default function UserList() {
                 value['region'] !== currentData['region'] ||
                 value['roleId'] !== currentData['roleId']
             ) {
-                axios.patch(`http://localhost:8000/users/${currentData.id}`, value).then(() => {
-                    axios.get("http://localhost:8000/users?_expand=role").then(res => {
-                        setDataSource(res.data)
+                axios.patch(`/users/${currentData.id}`, value).then(() => {
+                    axios.get("/users?_expand=role").then(res => {
+                        let list = res.data
+                        // 超级管理员可以看到所有用户
+                        setDataSource(roleId === 1 ? list : [
+                            // 区域管理员可以看到自己以及和自己同一区域以及区域编辑
+                            ...list.filter(item => item.username === username),
+                            ...list.filter(item => item.region === region && item.roleId === 3)
+                        ])
                     })
                 })
             }
@@ -202,20 +210,27 @@ export default function UserList() {
         })
     }
     //获取user数据
+    //这里面要做一下权限分配
     useEffect(() => {
-        axios.get("http://localhost:8000/users?_expand=role").then(res => {
-            setDataSource(res.data)
+        axios.get("/users?_expand=role").then(res => {
+            let list = res.data
+            // 超级管理员可以看到所有用户
+            setDataSource(roleId === 1 ? list : [
+                // 区域管理员可以看到自己以及和自己同一区域以及区域编辑
+                ...list.filter(item => item.username === username),
+                ...list.filter(item => item.region === region && item.roleId === 3)
+            ])
         })
-    }, [])
+    }, [roleId, region, username])
     //获取roles数据
     useEffect(() => {
-        axios.get("http://localhost:8000/roles").then(res => {
+        axios.get("/roles").then(res => {
             setRoles(res.data)
         })
     }, [])
     // 获取region数据
     useEffect(() => {
-        axios.get("http://localhost:8000/regions").then(res => {
+        axios.get("/regions").then(res => {
             setRegionData(res.data)
         })
     }, [])
@@ -243,7 +258,13 @@ export default function UserList() {
                 onCancel={() => setIsModalVisible(false)}
                 onOk={() => addFormOk()}
             >
-                <Userfrom ref={addForm} roles={roles} regionData={regionData} />
+                {/* 传个子项的四个属性为：
+                   1. ref：我们需要拿到表格ref，
+                    2. roles： 权限列表
+                    3.regionData: 选择区域
+                    4.isAddAuthority:标识为父项为添加用户Modal，主要和权限有关
+                 */}
+                <Userfrom ref={addForm} roles={roles} regionData={regionData} isAddAuthority={true} />
             </Modal>
             {/* 更新用户Modal，里面套个Form */}
             <Modal
@@ -257,7 +278,11 @@ export default function UserList() {
                 }}
                 onOk={() => updateFormOk()}
             >
-                <Userfrom ref={updateForm} roles={roles} regionData={regionData} isUpdateDisabled={isUpdateDisabled} />
+                {/* 传个子项的五个属性，3个和上一个Userfrom相同不再赘述：
+                   4.isUpdateDisabled：配合子项的isDisabled解决：当选择超级管理员时，不能选择区域。切换角色时依然禁止选择区域的Bug
+                   5.isUpdateAuthority:标识为父项为更新用户Modal，主要和权限有关
+                 */}
+                <Userfrom ref={updateForm} roles={roles} regionData={regionData} isUpdateDisabled={isUpdateDisabled} isUpdateAuthority={true} />
             </Modal>
         </>
 

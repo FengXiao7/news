@@ -5,13 +5,42 @@ const { Item } = Form
 
 
 const Userfrom = forwardRef((props, ref) => {
-    
+
     // 选择超级管理员时，禁用选择区域
     const [isDisabled, setIsDisabled] = useState(false)
+    //所需用户权限
+    const { roleId, region } = JSON.parse(localStorage.getItem("token"))
+    // 用户当前可以选择的区域
+    const checkRegionDisabled = (regionName) => {
+        //更新用户
+        if (props.isUpdateAuthority) {
+            //超级管理员随意更改区域，其他人不能更改区域
+            return roleId !== 1
+        }
+        //添加用户
+        if (props.isAddAuthority) {
+            // 超级管理员随意更改区域,其他人只能添加本区域
+            return roleId === 1 ? false : region !== regionName
+        }
+    }
+    // 用户当前可以选择的角色
+    const checkRoleDisabled = (itemId) => {
     
-    useEffect(()=>{
+        //更新用户
+        if (props.isUpdateAuthority) {
+            //超级管理员随意选择角色，其他人不能更改角色
+            return roleId !== 1
+        }
+        //添加用户
+        if (props.isAddAuthority) {
+            // 超级管理员随意选择角色,其他人只能添加区域编辑
+            return roleId === 1 ?false:itemId!==3
+        }
+    }
+    checkRoleDisabled()
+    useEffect(() => {
         setIsDisabled(props.isUpdateDisabled)
-    },[props.isUpdateDisabled])
+    }, [props.isUpdateDisabled])
     return (
         <Form
             layout="vertical"
@@ -54,7 +83,7 @@ const Userfrom = forwardRef((props, ref) => {
                 <Select style={{ width: 120 }} disabled={isDisabled}>
                     {
                         props.regionData.map((region) => {
-                            return <Option key={region.id} value={region.value}>{region.value}</Option>
+                            return <Option key={region.id} value={region.value} disabled={checkRegionDisabled(region.value)}>{region.value}</Option>
                         })
                     }
                 </Select>
@@ -82,7 +111,7 @@ const Userfrom = forwardRef((props, ref) => {
                 }}>
                     {
                         props.roles.map(item =>
-                            <Option value={item.id} key={item.id}>{item.roleName}</Option>
+                            <Option value={item.id} key={item.id} disabled={checkRoleDisabled(item.id)}>{item.roleName}</Option>
                         )
                     }
                 </Select>

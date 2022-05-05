@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import {withRouter} from 'react-router-dom'
-import { Layout, Menu, Dropdown,Avatar } from 'antd';
+import { withRouter } from 'react-router-dom'
+import { Layout, Menu, Dropdown, Avatar } from 'antd';
 import {
     MenuUnfoldOutlined,
     MenuFoldOutlined,
@@ -9,21 +9,25 @@ import {
 
 
 const { Header } = Layout;
-const TopHeader=({history})=> {
+const TopHeader = ({ history }) => {
+    // 点击小图标，折叠侧边栏
     const [collapsed, setcollapsed] = useState(false)
+    // 折叠侧边栏
     const changeCollapsed = () => {
         setcollapsed(!collapsed)
     }
-
+    // 
+    const {username,role:{roleName}} = JSON.parse(localStorage.getItem('token'))
+    //下拉菜单
     const menu = (
         <Menu
             items={[
                 {
-                    label: '超级管理员'
+                    label: roleName
                 },
                 {
                     danger: true,
-                    onClick:()=>{
+                    onClick: () => {
                         localStorage.removeItem('token')
                         history.replace('/login')
                     },
@@ -40,10 +44,11 @@ const TopHeader=({history})=> {
                     <MenuFoldOutlined onClick={changeCollapsed} />
             }
             <div style={{ float: 'right' }}>
+                <span>欢迎<span style={{ color: "#1890ff" }}>{roleName}:{username}</span></span>
                 <Dropdown overlay={menu}>
                     <Avatar style={{ backgroundColor: '#87d068' }} icon={<UserOutlined />} />
                 </Dropdown>
-                
+
             </div>
 
         </Header >

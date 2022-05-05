@@ -1,5 +1,3 @@
-
-
 # 说明：
 
 整个项目的后端接口都是json-server做的，启动的时候请开启8000端口。
@@ -10,7 +8,7 @@
 
 json-server --watch .\db.json -p 8000
 
-更多命令参见官网：
+更多命令参见官网
 
 
 
@@ -228,7 +226,7 @@ onFilter,这个属性是一个函数，接收两个参数。在里面写我们�
 - 方案1 先在页面更新，再发送请求更新后台，缺点整理数据麻烦
 - 方案2 发送请求更新成功后，再次发送请求得到最新数据,缺点要发两次请求.
 
-  不知道哪种用的多一点
+  不知道哪种用的多一点。
 
 ## 粒子动画
 
@@ -241,3 +239,206 @@ onFilter,这个属性是一个函数，接收两个参数。在里面写我们�
 我随便找了一个：
 
 <img src="https://picture-feng.oss-cn-chengdu.aliyuncs.com/img/147.gif" style="zoom: 100%"></img>
+
+# 第三天
+
+## 登录请求
+
+
+
+三个信息不对，不能通过。
+
+- 用户名不存在
+- 用户名存在，但密码不正确
+- 用户名存在，密码正确，但roleState为false，也就是本人限制了权限，见下图。
+
+![image-20220505173340236](https://picture-feng.oss-cn-chengdu.aliyuncs.com/img/image-20220505173340236.png)
+
+由于是json-server，就不要奢望直接有接口判断输入数据合法性了，也没有索引什么的。为了保证正确提示信息，只能
+
+一连4发请求，相当丑陋，应该有啥优化方法吧。暂时没想到。
+
+```js
+//表单收集完成回调 
+  const onFinish = (values) => {
+    axios.get(`http://localhost:8000/users?username=${values.username}`)
+      .then(res => res.data.length === 0 ? message.warning(`不存在用户${values.username}！`) :
+        axios.get(`http://localhost:8000/users?username=${values.username}&password=${values.password}`)
+          .then(res => res.data.length === 0 ? message.warning(`用户${values.username}密码错误！`) :
+            axios.get(`http://localhost:8000/users?username=${values.username}&password=${values.password}&roleState=true`)
+              .then(res => res.data.length === 0 ? message.warning(`用户${values.username}没有权限！`) :
+                axios.get(`http://localhost:8000/users?username=${values.username}&password=${values.password}&roleState=true&_expand=role`)
+                  .then(res => {
+        //这里把用户信息存进localStorage，再跳转
+                    localStorage.setItem('token', JSON.stringify(res.data[0]))
+                    message.success('欢迎'+values.username+"!")
+                    history.push("/")
+                  }
+                  ))))
+  }
+```
+
+## 用户权限
+
+不同角色所能管理的用户权限是不同的：
+
+- 超级管理员：可以看到所有用户；可以添加或修改所有角色的所有属性
+- 区域管理员：可以看到自己和与自己同一个区域下的区域编辑；可以添加的角色只有区域编辑，而且只能添加和自已一个区域的；不能修改角色的区域和角色等级，其他属性都可以修改
+- 区域编辑：没有用户权限。
+
+我们可以直接在localStorage里面拿到对应用户的权限，然后再去对应页面再筛一遍就行，不是很难办到。
+
+## 路由权限
+
+防止级别不高的角色，直接在地址栏输入无权进入的页面。比如区域编辑可以看用户列表之类的
+
+
+
+因为后台数据里面的key值，已经包含了路由路径（就是权限，也就是key值）。我们可以**动态创建路由**。
+
+
+
+注意我们的的key值包含在两张表里面，rights和children。我们可以只发一个rights?_embed=children请求，然后把
+
+得到的数据数组扁平化。也可以用Promise.all发两条请求，合并在一起得到一个大数组。像下面这样，我就是用的这种方法。
+
+
+
+再注意这里面**有些路径是不需要的**，我们用一个映射表筛一下，
+
+![image-20220505165618486](https://picture-feng.oss-cn-chengdu.aliyuncs.com/img/image-20220505165618486.png)
+
+给有页面的路径，绑定组件，这样就形成了一个映射表。
+
+像/user-manage/add这种就不需要绑定了。
+
+```js
+// 本地路由表映射
+const LocalRouterMap = {
+    "/home":Home,
+    "/user-manage/list":UserList,
+    "/right-manage/role/list":RoleList,
+    "/right-manage/right/list":RightList,
+    "/news-manage/add":NewsAdd,
+    "/news-manage/draft":NewsDraft,
+    "/news-manage/category":NewsCategory,
+    "/audit-manage/audit":Audit,
+    "/audit-manage/list":AuditList,
+    "/publish-manage/unpublished":Unpublished,
+    "/publish-manage/published":Published,
+    "/publish-manage/sunset":Sunset
+}
+```
+
+最后结合localStorage里面的用户权限，遍历就行了
+
+```js
+ const [BackRouteList, setBackRouteList] = useState([])
+    // 把rights和children直接合并在一起
+    //或者查询rights?_embed=children，然后数组扁平化
+    useEffect(()=>{
+        Promise.all([
+            axios.get("/rights"),
+            axios.get("/children"),
+        ]).then(res=>{
+            setBackRouteList([...res[0].data,...res[1].data])
+            // console.log(BackRouteList)
+        })
+    },[])
+	//拿到用户权限
+    const {role:{rights}} = JSON.parse(localStorage.getItem("token"))
+    // 检查路由，本地得有且pagepermisson为1
+    const checkRoute = (item)=>{
+        return LocalRouterMap[item.key] && item.pagepermisson
+    }
+    //当前登录用户权限表里面必须得有对应权限
+    const checkUserPermission = (item)=>{
+        return rights.includes(item.key)
+    }
+
+    return (
+        <Switch>
+            {
+                BackRouteList.map(item=>
+                    {
+                        if(checkRoute(item) && checkUserPermission(item)){
+                            return <Route path={item.key} key={item.id} component={LocalRouterMap[item.key]} exact/> 
+                         }
+                        //  没有权限直接返回null，最终还是去找*，
+                        return null
+                    }   
+                )
+            }
+
+            <Redirect from="/" to="/home" exact />
+            {
+                BackRouteList.length>0 && <Route path="*" component={Nopermission} />
+            }
+        </Switch>
+    )
+```
+
+
+
+## 新闻业务前瞻
+
+业务字段：
+
+![image-20220505165257705](https://picture-feng.oss-cn-chengdu.aliyuncs.com/img/image-20220505165257705.png)
+
+审核流程：
+
+![image-20220505165317110](https://picture-feng.oss-cn-chengdu.aliyuncs.com/img/image-20220505165317110.png)
+
+发布流程：
+
+![image-20220505165342213](https://picture-feng.oss-cn-chengdu.aliyuncs.com/img/image-20220505165342213.png)
+
+## 发现一个更新bug
+
+区域管理员更新角色后，居然会显示所用用户！
+
+原来是这里当初为了偷懒，连发两次请求，还没有过滤数据
+
+```js
+axios.patch(`/users/${currentData.id}`, value).then(() => {
+                    axios.get("/users?_expand=role").then(res => {
+                        //这里要筛选一下喔
+                        setDataSource(res.data)
+                    })
+                })
+```
+
+过滤一下：
+
+```js
+axios.patch(`/users/${currentData.id}`, value).then(() => {
+                    axios.get("/users?_expand=role").then(res => {
+                        let list = res.data
+                        // 超级管理员可以看到所有用户
+                        setDataSource(roleId === 1 ? list : [
+                            // 区域管理员可以看到自己以及和自己同一区域以及区域编辑
+                            ...list.filter(item => item.username === username),
+                            ...list.filter(item => item.region === region && item.roleId === 3)
+                        ])
+                    })
+                })
+```
+
+## 富文本：
+
+传送门：
+
+[jpuri/react-draft-wysiwyg: A Wysiwyg editor build on top of ReactJS and DraftJS. https://jpuri.github.io/react-draft-wysiwyg](https://github.com/jpuri/react-draft-wysiwyg)
+
+[React Draft Wysiwyg (jpuri.github.io)](https://jpuri.github.io/react-draft-wysiwyg/#/demo)
+
+判断用户是否填写内容，没在官方文档找到对应api。
+
+自己写了个正则：
+
+```js
+/(\<p\>(\&nbsp;)*\<\/p\>){1,}/
+```
+
+但是如果用户输入<p></p>类似的，还是会匹配到。没想到啥好的解决办法。

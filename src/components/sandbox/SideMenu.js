@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import {withRouter} from 'react-router-dom'
+import { withRouter } from 'react-router-dom'
 import axios from 'axios';
 import { Layout, Menu } from 'antd';
 import {
@@ -28,42 +28,51 @@ const iconList = {
     "/right-manage/role/list": <UserOutlined />,
     "/right-manage/right/list": <UserOutlined />
 }
+
 //普通组件，用withRouter包一下，顺便拿一下location和history
-function SideMenu({location,history}) {
+function SideMenu({ location, history }) {
     const [menu, setMenu] = useState([])
-    // 获取侧边栏数据
-    useEffect(() => {
-        axios.get("http://localhost:8000/rights?_embed=children")
-            .then(res => setMenu(res.data))
-    }, [])
+    //拿到权限
+    const { role: { rights } } = JSON.parse(localStorage.getItem("token"))
     //设置Menu的items项
     //因为只有两级，就不用递归了
     const renderMenu = (menu) => {
         let menuList = []
         menu.forEach(m => {
             //有第二级
-            if (m.children.length > 0) {
+            if (m.children.length > 0 && changeMenuAuthority(m)) {
                 let children = []
                 m.children.forEach(c => {
-                    // 只渲染pagepermisson为1的
-                    if (c.pagepermisson === 1) {
+                    // 只渲染符合权限要求的
+                    if (changeMenuAuthority(c)) {
                         children.push(getItem(c.title, c.key))
                     }
                 })
                 menuList.push(getItem(m.title, m.key, iconList[m.key], children))
             } else {
-                menuList.push(getItem(m.title, m.key, iconList[m.key]))
+                changeMenuAuthority(m) && menuList.push(getItem(m.title, m.key, iconList[m.key]))
             }
         })
         return menuList;
     }
+    // 检查侧边栏菜单权限
+    //两个要求pagepermisson为1，当前登录用户权限列表中有对应权限
+    const changeMenuAuthority = (item) => {
+        return item.pagepermisson && rights.includes(item.key)
+    }
     //跳转路由
-    const go = (e)=>{
+    const go = (e) => {
         history.push(e.key)
     }
     // 用于展示默认key 数组
     const selectKeys = [location.pathname]
-    const openKeys = ["/"+location.pathname.split("/")[1]]
+    const openKeys = ["/" + location.pathname.split("/")[1]]
+
+    // 获取侧边栏数据
+    useEffect(() => {
+        axios.get("/rights?_embed=children")
+            .then(res => setMenu(res.data))
+    }, [])
     return (
         <Sider trigger={null} collapsible={true} >
             <div style={{ display: "flex", height: "100%", "flexDirection": "column" }}>
@@ -77,7 +86,7 @@ function SideMenu({location,history}) {
                 }} >
                     新闻管理系统
                 </div>
-                <div style={{flex:1,"overflow":"auto"}}>
+                <div style={{ flex: 1, "overflow": "auto" }}>
                     <Menu
                         onClick={go}
                         theme="dark"
