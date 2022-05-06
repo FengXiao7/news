@@ -7,6 +7,8 @@ import UserList from '../views/sandbox/user-manage/UserList'
 import { Switch, Route, Redirect } from 'react-router-dom'
 import NewsAdd from '../views/sandbox/news-manage/NewsAdd'
 import NewsDraft from '../views/sandbox/news-manage/NewsDraft'
+import NewsPreview from '../views/sandbox/news-manage/NewsPreview.js'
+import NewsUpdate from '../views/sandbox/news-manage/NewsUpdate.js'
 import NewsCategory from '../views/sandbox/news-manage/NewsCategory'
 import Audit from '../views/sandbox/audit-manage/Audit'
 import AuditList from '../views/sandbox/audit-manage/AuditList'
@@ -16,15 +18,17 @@ import Sunset from '../views/sandbox/publish-manage/Sunset'
 import axios from 'axios'
 // 本地路由表映射
 const LocalRouterMap = {
-    "/home":Home,
-    "/user-manage/list":UserList,
-    "/right-manage/role/list":RoleList,
-    "/right-manage/right/list":RightList,
-    "/news-manage/add":NewsAdd,
-    "/news-manage/draft":NewsDraft,
-    "/news-manage/category":NewsCategory,
-    "/audit-manage/audit":Audit,
-    "/audit-manage/list":AuditList,
+    "/home":Home,                               //首页
+    "/user-manage/list":UserList,               //用户列表
+    "/right-manage/role/list":RoleList,         //角色列表
+    "/right-manage/right/list":RightList,       //权限列表
+    "/news-manage/add":NewsAdd,                 //撰写新闻
+    "/news-manage/draft":NewsDraft,             //草稿箱
+    "/news-manage/category":NewsCategory,       //新闻分类
+    "/news-manage/preview/:id":NewsPreview,     //新闻预览   routepermisson
+    "/news-manage/update/:id":NewsUpdate,       //更新新闻   routepermisson
+    "/audit-manage/audit":Audit,                //审核新闻
+    "/audit-manage/list":AuditList,             //审核列表   只能看自己撰写的新闻
     "/publish-manage/unpublished":Unpublished,
     "/publish-manage/published":Published,
     "/publish-manage/sunset":Sunset
@@ -45,9 +49,9 @@ export default function NewsRouter() {
         })
     },[])
     const {role:{rights}} = JSON.parse(localStorage.getItem("token"))
-    // 检查路由，本地得有且pagepermisson为1
+    // 检查路由，本地得有且pagepermisson为1或者routepermisson为1
     const checkRoute = (item)=>{
-        return LocalRouterMap[item.key] && item.pagepermisson
+        return LocalRouterMap[item.key] && (item.pagepermisson||item.routepermisson)
     }
     //当前登录用户权限表里面必须得有，对应权限
     const checkUserPermission = (item)=>{

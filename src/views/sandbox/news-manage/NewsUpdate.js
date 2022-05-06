@@ -23,7 +23,8 @@ const iconList = {
     "5": <DribbbleCircleFilled />,
     "6": <CalculatorFilled />
 }
-export default function NewsAdd(props) {
+// 这个地方大部分都和NewsAdd相似,可以考虑抽取成一个组件.这里就不抽取了
+export default function NewsUpdate(props) {
     // 步骤条
     const [current, setCurrent] = useState(0)
     // 新闻分类
@@ -31,25 +32,16 @@ export default function NewsAdd(props) {
     // 收集步骤0Form表单数据
     const [formData, setFormData] = useState({})
     // 收集步骤1富文本数据
-    const [editorData, seteditorData] = useState("")
-    //角色数据
-    const User = JSON.parse(localStorage.getItem('token'))
+    const [editorData, setEditorData] = useState("")
     // Form表单Ref
     const NewsForm = useRef(null)
-    // 步骤2点击保存草稿箱或者提交审核，触发回调
+    // 步骤2点击保存草稿箱或者提交审核，触发回调.
+    //和NewsAdd组件不同的是，这里直接patch就行啦
     const handleSave = (auditState) => {
-        axios.post('/news', {
+        axios.patch(`/news/${props.match.params.id}`, {
             ...formData,
             "content": editorData,
-            "region": User.region ? User.region : "全球",
-            "author": User.username,
-            "roleId": User.roleId,
-            "auditState": auditState,
-            "publishState": 0,
-            "createTime": Date.now(),
-            "star": 0,
-            "view": 0,
-            "publishTime": 0
+            "auditState": auditState
         }).then(res => {
             props.history.push(auditState === 0 ? '/news-manage/draft' : '/audit-manage/list')
             
@@ -93,13 +85,25 @@ export default function NewsAdd(props) {
     useEffect(() => {
         axios.get("/categories").then(res => setCategories(res.data))
     }, [])
-
+    // 获取新闻信息,用于更新新闻
+    useEffect(() => {
+        axios.get(`news/${props.match.params.id}?_expand=category&_expand=role`)
+            .then(res => {
+                let {title,categoryId,content}=res.data
+                NewsForm.current.setFieldsValue({
+                    title,
+                    categoryId
+                })
+                // 把富文本数据，传递给富文本
+                setEditorData(content)
+            })
+    }, [props.match.params.id])
     return (
         <>
             {/* 页头 */}
             <PageHeader
                 onBack={() => props.history.goBack()}
-                title="撰写新闻"
+                title="更新新闻"
             />
             {/* 步骤条 */}
             <Steps current={current}>
@@ -158,8 +162,9 @@ export default function NewsAdd(props) {
             {/* 步骤1富文本 */}
             <div style={{ display: current === 1 ? 'block' : 'none' }}>
                 <NewsEditor
+                    editorData={editorData}
                     getContent={(value) => {
-                        seteditorData(value)
+                        setEditorData(value)
                     }}
                 >
                 </NewsEditor>

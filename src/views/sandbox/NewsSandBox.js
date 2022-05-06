@@ -20,6 +20,7 @@ export default function NewsSandBox() {
     useEffect(()=>{
         nprogress.done()
     })
+    // console.log(1)
     return (
         <Layout>
             {/* <Sider></Sider> */}

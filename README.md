@@ -304,13 +304,13 @@ onFilter,这个属性是一个函数，接收两个参数。在里面写我们�
 
 
 
-再注意这里面**有些路径是不需要的**，我们用一个映射表筛一下，
+再注意这里面**有些路径是不需要的**，它们只是单纯地代表权限，没有对应路由，我们用一个映射表筛一下，
 
 ![image-20220505165618486](https://picture-feng.oss-cn-chengdu.aliyuncs.com/img/image-20220505165618486.png)
 
 给有页面的路径，绑定组件，这样就形成了一个映射表。
 
-像/user-manage/add这种就不需要绑定了。
+像/user-manage/add这种没有路由的，就不需要绑定了。
 
 ```js
 // 本地路由表映射
@@ -386,6 +386,8 @@ const LocalRouterMap = {
 
 ![image-20220505165257705](https://picture-feng.oss-cn-chengdu.aliyuncs.com/img/image-20220505165257705.png)
 
+**auditState和publishState**这两个字段四个值含义一定要记清楚，不要搞混了。新闻发布流程基本就靠这2个字段了
+
 审核流程：
 
 ![image-20220505165317110](https://picture-feng.oss-cn-chengdu.aliyuncs.com/img/image-20220505165317110.png)
@@ -425,6 +427,8 @@ axios.patch(`/users/${currentData.id}`, value).then(() => {
                 })
 ```
 
+我的这个过滤只是把一个大请求里面的数据过滤，实际开发中一定不能这样做。一般都会重新发一个带更多修饰条件的请求的，这里偷懒了。
+
 ## 富文本：
 
 传送门：
@@ -442,3 +446,147 @@ axios.patch(`/users/${currentData.id}`, value).then(() => {
 ```
 
 但是如果用户输入<p></p>类似的，还是会匹配到。没想到啥好的解决办法。
+
+## antD通知框：
+
+placement就是通知框跳出位置。
+
+```js
+notification.info({
+                message: `通知`,
+                description:
+                    `您可以到审核列表中查看您的新闻`,
+                placement: "top",
+            });
+```
+
+
+
+# 第四天
+
+## 新闻预览
+
+![image-20220506142346524](https://picture-feng.oss-cn-chengdu.aliyuncs.com/img/image-20220506142346524.png)
+
+## 时间处理
+
+还是用moment喔
+
+npm install moment *--save*
+
+## 善于利用映射表
+
+```js
+// 审核状态映射表
+const auditList = {
+    0: "未审核",
+    1: '审核中',
+    2: '已通过',
+    3: '未通过'
+}
+// 发布状态映射表
+const publishList = {
+    0: "未发布",
+    1: '待发布',
+    2: '已上线',
+    3: '已下线'
+}
+// 状态颜色表
+const colorState = {
+    0: "red",
+    1: "yellow",
+    2: "green",
+    3: "red"
+}
+```
+
+## dangerouslySetInnerHTML:
+
+我们要在新闻预览页面可以看到新闻内容喔，就需要在页面上插入HTML。为避免XSS攻击，就需要用这个属性喔
+
+
+
+传送门：
+
+[(26条消息) react中dangerouslySetInnerHTML使用（简洁）_exploringfly的博客-CSDN博客_dangerouslysetinnerhtml](https://blog.csdn.net/exploringfly/article/details/80582859)
+
+- 1.dangerouslySetInnerHTMl 是React标签的一个属性，类似于angular的ng-bind，vue中的v-html
+- 2.有2个{{}}，第一{}代表jsx语法开始，第二个是代表dangerouslySetInnerHTML接收的是一个对象键值对;
+
+- 3.既可以插入DOM，又可以插入字符串；
+
+- 4.不合时宜的使用 innerHTML 可能会导致 cross-site scripting (XSS) 攻击。 净化用户的输入来显示的时候，经常会出现错误，不合适的净化也是导致网页攻击的原因之一。dangerouslySetInnerHTML 这个 prop 的命名是故意这么设计的，以此来警告，它的 prop 值（ 一个对象而不是字符串 ）应该被用来表明净化后的数据。
+
+## 修改新闻
+
+这个时候我们又需要把html写回富文本，看官方文档吧。很容易找到
+
+[React Draft Wysiwyg (jpuri.github.io)](https://jpuri.github.io/react-draft-wysiwyg/#/docs?_k=jjqinp)
+
+用这个就行
+
+```
+import htmlToDraft from 'html-to-draftjs';
+```
+
+## json-server操作符
+
+_ne不等于，__lte小于等于我们会用到。还有 _like, _gte等等操作符
+
+[typicode/json-server: Get a full fake REST API with zero coding in less than 30 seconds (seriously) (github.com)](https://github.com/typicode/json-server#operators)
+
+## antD可编辑表格
+
+这个太复杂了，目前我感觉会用就行了。有空研究研究。
+
+我记录下官方写法：
+
+### 1.components
+
+Table多了一个属性最里面有两个属性EditableRow和EditableCell
+
+```jsx
+<Table
+            dataSource={dataSource}
+            columns={columns}
+            rowKey={(item) => item.id}
+            components={{
+                body: {
+                    row: EditableRow,
+                    cell: EditableCell,
+                }
+            }}
+        />
+```
+
+### 2.EditableRow和EditableCell
+
+这两个就是复杂的地方，有空研究研究。
+
+需要用到context和ref，记得提前引入和创建
+
+![image-20220506214727705](https://picture-feng.oss-cn-chengdu.aliyuncs.com/img/image-20220506214727705.png)
+
+### 3.columns
+
+在columns数组里面，在你想要可编辑单元格的地方，多写一个 onCell属性，见下
+
+```js
+{
+            title: '分类名称',
+            dataIndex: 'title',
+            onCell: (record) => ({
+                record,
+                editable: true,
+                dataIndex: 'title',
+                title: '分类名称',
+                handleSave: handleSave,
+              }),
+        },
+```
+
+### 4.handleSave
+
+最终我们写个handleSave函数，第一个参数就可以接收最新的单元格信息。
+
+<img src="https://picture-feng.oss-cn-chengdu.aliyuncs.com/img/148.gif" style="zoom: 100%"></img>
