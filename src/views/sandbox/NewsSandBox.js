@@ -1,9 +1,8 @@
-import React,{useEffect} from 'react'
+import React from 'react'
 import SideMenu from '../../components/sandbox/SideMenu'
 import TopHeader from '../../components/sandbox/TopHeader'
 import NewsRouter from '../../router/NewsRouter'
-import nprogress from 'nprogress'
-import 'nprogress/nprogress.css'
+
 import './NewsSandBox.css'
 // import Sider from '../../components/test'
 
@@ -15,12 +14,7 @@ import { Layout } from 'antd'
 const {Content} = Layout
 
 export default function NewsSandBox() {
-    nprogress.start()
-    // 每次 render 完成后，关闭进度条
-    useEffect(()=>{
-        nprogress.done()
-    })
-    // console.log(1)
+ 
     return (
         <Layout>
             {/* <Sider></Sider> */}

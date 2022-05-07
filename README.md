@@ -590,3 +590,173 @@ Table多了一个属性最里面有两个属性EditableRow和EditableCell
 最终我们写个handleSave函数，第一个参数就可以接收最新的单元格信息。
 
 <img src="https://picture-feng.oss-cn-chengdu.aliyuncs.com/img/148.gif" style="zoom: 100%"></img>
+
+# 第五天
+
+## 发布管理
+
+这部分3个页面，待发布，已发布，已下线。页面都差不多，直接抽成一个组件。函数部分也一样，就是axios请求的publishState不一样，直接自定义hooks就行。
+
+还有一个不一样的地方就是按钮，由于按钮触发的回调不一样，但都必须拿到新闻id。我们直接传函数，以未发布组件为例：
+
+自定义hooks中：
+
+```js
+//未发布的发布按钮回调
+    const handlePublish = (id) => {
+        //执行发布逻辑
+    }
+```
+
+待发布组件Unpublished：
+
+```jsx
+ // 待发布为publishState为1
+    const { dataSource, handlePublish } = usePublish(1)
+
+    return (
+        <NewsPublish
+            dataSource={dataSource}
+            // 这是一个传递给子项的属性名叫button
+            //button是一个函数，函数返回一个组件
+    		//写成函数才能拿到id喔
+            button={(id) =>
+                <Popconfirm
+                    title="确定发布吗？"
+                    okText="是"
+                    cancelText="否"
+                    onConfirm={() => handlePublish(id)}
+                >
+                    <Tooltip placement="bottomLeft" title={<span>发布新闻</span>} >
+                        <Button type="primary">发布</Button>
+                    </Tooltip>
+                </Popconfirm>
+            }
+        />
+    )
+```
+
+
+
+公共组件NewsPublish：
+
+columns列中
+
+```jsx
+{
+            title:'操作',
+            render(item){
+                // 执行button这个函数，这样就可以拿到id了
+                return(
+                    <>
+                        {props.button(item.id)}
+                    </>
+                )
+            }
+}
+```
+
+## antD的Spin
+
+加载，包裹在需要加载的地方。我包在NewsRouter里面。
+
+然后属性spinning控制是否显示加载，用redux管理这个状态就行
+
+```jsx
+<Spin size="large" spinning={props.isLoading}>
+            <Switch>
+…………………………………………………………………………………………路由…………………………………………………………………………………………
+            </Switch>
+        </Spin>
+```
+
+
+
+## react-redux
+
+主要引入两个reducer，分别处理折叠侧边栏，和loading。两个都是简单的布尔值，由于隔得太远，就用redux了。
+
+没啥好说的。
+
+喔，loading是放在axios拦截器里面dispatch的，没在组件里面，所以要手动引入下store
+
+## redux持久化
+
+用这个库：redux-persist。
+
+官方文档：[rt2zz/redux-persist: persist and rehydrate a redux store (github.com)](https://github.com/rt2zz/redux-persist)
+
+刷新后redux的状态不会变为初始值，我们的这个设置把状态放在localStorage里面了。
+
+一切配置按照官网说明来
+
+![image-20220507170506376](https://picture-feng.oss-cn-chengdu.aliyuncs.com/img/image-20220507170506376.png)
+
+### store.js:
+
+```js
+import { createStore, combineReducers } from 'redux'
+import { CollapsedReducer } from './reducer/CollapsedReducer'
+import { isLoadingReducer } from './reducer/isLoadingReducer'
+import { composeWithDevTools } from 'redux-devtools-extension'
+import { persistStore, persistReducer } from 'redux-persist'
+import storage from 'redux-persist/lib/storage'
+
+//持久化配置
+const persistConfig = {
+    key: '小冯',
+    storage,
+}
+// 合并reducer
+const reducer = combineReducers({
+    CollapsedReducer,
+    isLoadingReducer
+})
+// 改造我们的reducer
+const persistedReducer = persistReducer(persistConfig, reducer)
+
+let store = createStore(persistedReducer, composeWithDevTools())
+let persistor = persistStore(store)
+
+
+export  { store, persistor }
+```
+
+### App.js
+
+```jsx
+import IndexRouter from './router/IndexRouter'
+import { Provider } from 'react-redux'
+import { store,persistor } from './redux/store'
+import { PersistGate } from 'redux-persist/integration/react'
+import './App.css'
+
+function App() {
+  return (
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <IndexRouter />
+      </PersistGate>
+    </Provider>
+  )
+}
+export default App
+```
+
+### 自定制持久化
+
+当然不能把所有的状态都持久化，可以自定制的。
+
+用白名单或者黑名单都行。
+
+https://github.com/rt2zz/redux-persist#blacklist--whitelist
+
+## 数据可视化：
+
+### json-server排序，分页
+
+传送门：
+
+[typicode/json-server: Get a full fake REST API with zero coding in less than 30 seconds (seriously) (github.com)](https://github.com/typicode/json-server#sort)
+
+https://github.com/typicode/json-server#paginate

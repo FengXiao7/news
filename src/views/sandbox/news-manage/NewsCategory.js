@@ -3,7 +3,6 @@ import { Table, Button, Popconfirm, Form,Input } from 'antd'
 import axios from 'axios'
 import {
     DeleteOutlined,
-    EditTwoTone
 } from '@ant-design/icons';
 
 export default function NewsCategory() {

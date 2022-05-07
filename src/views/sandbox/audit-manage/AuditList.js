@@ -26,13 +26,6 @@ const auditList = {
     2: '已通过',
     3: '未通过'
 }
-// 发布状态映射表
-const publishList = {
-    0: "未发布",
-    1: '待发布',
-    2: '已上线',
-    3: '已下线'
-}
 // 状态颜色表
 const colorState = {
     0: "red",

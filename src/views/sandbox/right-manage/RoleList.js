@@ -17,6 +17,7 @@ export default function RoleList() {
     const [currentID, setCurrentID] = useState(0)
     //对话框是否隐藏
     const [isModalVisible, setIsModalVisible] = useState(false);
+    // 表格列
     const columns = [
         {
             title: 'ID',

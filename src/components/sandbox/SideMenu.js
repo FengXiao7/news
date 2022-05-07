@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { withRouter } from 'react-router-dom'
 import axios from 'axios';
+import {connect} from 'react-redux'
 import { Layout, Menu } from 'antd';
 import {
     UserOutlined,
@@ -9,6 +10,12 @@ import {
 } from '@ant-design/icons';
 
 const { Sider } = Layout;
+// 映射状态至props
+const mapStateToProps=({CollapsedReducer:{isCollapsed}})=>{
+    return{
+        isCollapsed
+    }
+}
 //创建Menu子项
 function getItem(label, key, icon, children, type) {
     return {
@@ -29,8 +36,8 @@ const iconList = {
     "/right-manage/right/list": <UserOutlined />
 }
 
-//普通组件，用withRouter包一下，顺便拿一下location和history
-function SideMenu({ location, history }) {
+//普通组件，用withRouter包一下，顺便拿一下location和history还有redux中的isCollapsed
+function SideMenu({ location, history,isCollapsed }) {
     const [menu, setMenu] = useState([])
     //拿到权限
     const { role: { rights } } = JSON.parse(localStorage.getItem("token"))
@@ -74,7 +81,7 @@ function SideMenu({ location, history }) {
             .then(res => setMenu(res.data))
     }, [])
     return (
-        <Sider trigger={null} collapsible={true} >
+        <Sider trigger={null} collapsible={true} collapsed={isCollapsed}>
             <div style={{ display: "flex", height: "100%", "flexDirection": "column" }}>
                 <div style={{
                     lineHeight: '32px',
@@ -103,4 +110,4 @@ function SideMenu({ location, history }) {
     )
 }
 
-export default withRouter(SideMenu)
+export default connect(mapStateToProps)(withRouter(SideMenu))
