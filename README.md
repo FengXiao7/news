@@ -1,14 +1,102 @@
+# 页面概览：
+
+
+
+<img src="https://picture-feng.oss-cn-chengdu.aliyuncs.com/img/149.gif" style="zoom: 100%"></img>
+
+
+
+![image-20220508173452888](https://picture-feng.oss-cn-chengdu.aliyuncs.com/img/image-20220508173452888.png)
+
+
+
+![image-20220508173542982](https://picture-feng.oss-cn-chengdu.aliyuncs.com/img/image-20220508173542982.png)
+
+
+
+![image-20220508173658769](https://picture-feng.oss-cn-chengdu.aliyuncs.com/img/image-20220508173658769.png)
+
+
+
+![image-20220508173752203](https://picture-feng.oss-cn-chengdu.aliyuncs.com/img/image-20220508173752203.png)
+
+
+
+![image-20220508173829137](https://picture-feng.oss-cn-chengdu.aliyuncs.com/img/image-20220508173829137.png)
+
+
+
+![image-20220508174528540](https://picture-feng.oss-cn-chengdu.aliyuncs.com/img/image-20220508174528540.png)
+
+
+
+![image-20220508174944429](https://picture-feng.oss-cn-chengdu.aliyuncs.com/img/image-20220508174944429.png)
+
+
+
+![image-20220508175104442](https://picture-feng.oss-cn-chengdu.aliyuncs.com/img/image-20220508175104442.png)
+
+
+
+<img src="https://picture-feng.oss-cn-chengdu.aliyuncs.com/img/150.gif" style="zoom: 100%"></img>
+
 # 说明：
+
+## json-server
 
 整个项目的后端接口都是json-server做的，启动的时候请开启8000端口。
 
-在src目录下启动，
+在src目录下启动json-server
 
 命令：
 
 json-server --watch .\db.json -p 8000
 
-更多命令参见官网
+你也可以修改默认端口
+
+![image-20220508172227688](https://picture-feng.oss-cn-chengdu.aliyuncs.com/img/image-20220508172227688.png)
+
+## 启动前端项目
+
+npm install
+
+npm start
+
+## db.json
+
+你可以直接访问http://localhost:8000查看数据库所有内容.
+
+有7张表
+
+### users
+
+![image-20220508180811573](C:\Users\FengXiao7\AppData\Roaming\Typora\typora-user-images\image-20220508180811573.png)
+
+### roles
+
+![image-20220508181121337](C:\Users\FengXiao7\AppData\Roaming\Typora\typora-user-images\image-20220508181121337.png)
+
+### children
+
+![image-20220508181532928](C:\Users\FengXiao7\AppData\Roaming\Typora\typora-user-images\image-20220508181532928.png)
+
+
+
+### rights
+
+![image-20220508182046750](C:\Users\FengXiao7\AppData\Roaming\Typora\typora-user-images\image-20220508182046750.png)
+
+### categories
+
+![image-20220508182150165](C:\Users\FengXiao7\AppData\Roaming\Typora\typora-user-images\image-20220508182150165.png)
+
+### regions:
+
+![image-20220508182337075](C:\Users\FengXiao7\AppData\Roaming\Typora\typora-user-images\image-20220508182337075.png)
+
+### news:
+
+此表在第三天，新闻业务中有详细说明   <a href="#test">ctrl+鼠标左键跳转</a>
 
 
 
@@ -91,10 +179,10 @@ function getItem(label, key, icon, children, type) {
 const iconList = {
     "/home": <HomeOutlined />,
     "/user-manage": <UserOutlined />,
-    "/user-manage/list": <LockOutlined />,
-    "/right-manage": <UserOutlined />,
-    "/right-manage/role/list": <UserOutlined />,
-    "/right-manage/right/list": <UserOutlined />
+    "/right-manage": <LockOutlined />,
+    "/news-manage": <DesktopOutlined />,
+    "/audit-manage": <FormOutlined />,
+    "/publish-manage": <CheckOutlined />
 }
 ```
 
@@ -121,6 +209,8 @@ columns数组里面的render，
 
 
 ### Patch：
+
+打补丁喔
 
 传送门：
 
@@ -156,9 +246,7 @@ rowKey属性来指定key。
 
 ## 用户权限管理状态：
 
-用户权限管理这块，状态有很多，不要绕晕了。我都写了很详细的注释，代码里面更详细
-
-
+用户权限管理这块，状态有很多，不要绕晕了。我都写了很详细的注释。
 
 ## 同步：
 
@@ -380,7 +468,9 @@ const LocalRouterMap = {
 
 
 
-## 新闻业务前瞻
+## 新闻业务
+
+<a name="test">news</a>
 
 业务字段：
 
@@ -446,6 +536,8 @@ axios.patch(`/users/${currentData.id}`, value).then(() => {
 ```
 
 但是如果用户输入<p></p>类似的，还是会匹配到。没想到啥好的解决办法。
+
+而且有些特殊情况，比如用户输入文本过多之类的，还没解决
 
 ## antD通知框：
 
@@ -755,8 +847,126 @@ https://github.com/rt2zz/redux-persist#blacklist--whitelist
 
 ### json-server排序，分页
 
+为获取浏览量最多的新闻，点赞数最多的新闻。需要使用额外条件筛选
+
 传送门：
 
 [typicode/json-server: Get a full fake REST API with zero coding in less than 30 seconds (seriously) (github.com)](https://github.com/typicode/json-server#sort)
 
 https://github.com/typicode/json-server#paginate
+
+# 第六天
+
+## 数据可视化：
+
+### echars Bar柱状图
+
+我们在官方案例上，改改就行了，还是很简单。深入就难了喔。
+
+#### 导入问题
+
+传送门：
+
+[Import *](https://zh.javascript.info/import-export#import)
+
+#### 数据转化
+
+转化成这样的格式
+
+![image-20220508135646280](https://picture-feng.oss-cn-chengdu.aliyuncs.com/img/image-20220508135646280.png)
+
+用loadsh的groupBy就行
+
+传送门:[lodash中文文档 - 首页 (think2011.net)](http://lodash.think2011.net/groupBy)
+
+```js
+_.groupBy(res.data, item=>item.category.title)
+```
+
+最后根据echarts所需数据格式再转换一遍就行。
+
+x轴是Object.keys(data),y轴映射数组长度就行Object.values(data).map(item=>item.length)
+
+#### 小数
+
+y轴不应该有小数喔
+
+传送门：[Documentation - Apache ECharts](https://echarts.apache.org/zh/option.html#yAxis.minInterval)
+
+#### 响应式
+
+好像自带就有
+
+```jsx
+// 响应式
+        window.onresize = () => {
+            myChart.resize()
+        }
+```
+
+注意销毁时机，在useEffect return里面
+
+### echars Bar饼状图
+
+和Bar大差不差
+
+#### 抽屉
+
+把所需容器放在抽屉里。
+
+两个问题：
+
+1.必须在dom创建之后再绘制(setTimeOut解决)；
+
+2.由于抽屉打开关闭，会导致重复初始化。(把初始化的值，用状态保存。判断一下状态是否为空就行)
+
+
+
+## 游客系统
+
+写一个非常简单的游客系统，供游客浏览点赞新闻，没有登录注册。
+
+只有两个路由：/news 所有已发布的新闻。/detail 新闻细节(和新闻预览页面基本上一样)
+
+获取数据，注意数据转化格式。
+
+```js
+// 已发布的所有新闻
+    const [newsList, setNewsList] = useState([]);
+    // 获取已发布的所有新闻
+    useEffect(() => {
+        axios.get('/news?publishState=2&_expand=category')
+            .then(res => {
+                // setNewsList(res.data)
+                let tempData = _.groupBy(res.data, item => item.category.title)
+                setNewsList(Object.entries(tempData))
+            })
+    }, [])
+```
+
+
+
+新闻浏览+1
+
+链式更新.不知道真正的这种业务该咋做，我这个只要一进来页面，就会访问量+1，应该再配套一个游客登录注册系统会好做一点
+
+```js
+  // 获取新闻信息,访问量+1
+    useEffect(() => {
+        axios.get(`/news/${match.params.id}?_expand=category`).then(res => {
+            // 本地浏览量+1
+            setNewsInfo({
+                ...res.data,
+                view:res.data.view+1
+            })
+            return res.data
+        }).then(res=>{
+            // 同步到后端
+            axios.patch(`/news/${match.params.id}`,{
+                view:res.view+1
+            })
+        })
+
+    }, [match.params.id])
+```
+

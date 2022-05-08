@@ -165,7 +165,7 @@ export default function NewsAdd(props) {
                 </NewsEditor>
             </div>
 
-            {/* 步骤2保存草稿箱或者提交审核 */}
+            {/* 步骤2保存草稿箱或者提交审核以及其他按钮 */}
             <div style={{ marginTop: '100px' }}>
                 {
                     current === 2 &&

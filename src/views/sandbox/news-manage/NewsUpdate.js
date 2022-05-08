@@ -90,6 +90,7 @@ export default function NewsUpdate(props) {
         axios.get(`news/${props.match.params.id}?_expand=category&_expand=role`)
             .then(res => {
                 let {title,categoryId,content}=res.data
+                // 设置表单字段值
                 NewsForm.current.setFieldsValue({
                     title,
                     categoryId

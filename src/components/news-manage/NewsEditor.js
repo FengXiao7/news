@@ -11,6 +11,7 @@ export default function NewsEditor(props) {
     // 接收父亲传递的editorData(html)，转化为Draft。这个只用于NewsUpdate组件，不用于NewsAdd组件
     useEffect(()=>{
         // 防止NewsAdd接收到的editorData为空而报错
+        //这种情况只会在父项是NewsAdd时会发生
         if(props.editorData===undefined) return
         const contentBlock = htmlToDraft(props.editorData);
         if (contentBlock) {

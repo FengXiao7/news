@@ -7,6 +7,9 @@ import {
     UserOutlined,
     HomeOutlined,
     LockOutlined,
+    FormOutlined,
+    CheckOutlined,
+    DesktopOutlined
 } from '@ant-design/icons';
 
 const { Sider } = Layout;
@@ -30,10 +33,10 @@ function getItem(label, key, icon, children, type) {
 const iconList = {
     "/home": <HomeOutlined />,
     "/user-manage": <UserOutlined />,
-    "/user-manage/list": <LockOutlined />,
-    "/right-manage": <UserOutlined />,
-    "/right-manage/role/list": <UserOutlined />,
-    "/right-manage/right/list": <UserOutlined />
+    "/right-manage": <LockOutlined />,
+    "/news-manage": <DesktopOutlined />,
+    "/audit-manage": <FormOutlined />,
+    "/publish-manage": <CheckOutlined />
 }
 
 //普通组件，用withRouter包一下，顺便拿一下location和history还有redux中的isCollapsed

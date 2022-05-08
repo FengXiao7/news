@@ -1,6 +1,7 @@
 import React from 'react';
 import Particles from 'react-tsparticles'
 import { loadFull } from "tsparticles";
+import { Link } from 'react-router-dom';
 import { Form, Input, Button, message } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import './Login.css'
@@ -10,7 +11,7 @@ import axios from 'axios';
 
 
 export default function Login({ history }) {
-  //表单收集完成回调 
+  //表单收集完成回调,相当丑陋！
   const onFinish = (values) => {
     axios.get(`/users?username=${values.username}`)
       .then(res => res.data.length === 0 ? message.warning(`不存在用户${values.username}！`) :
@@ -178,7 +179,7 @@ export default function Login({ history }) {
               },
             ]}
           >
-            <Input prefix={<UserOutlined />} placeholder="用户名" />
+            <Input prefix={<UserOutlined />} placeholder="用户名"/>
           </Form.Item>
           <Form.Item
             name="password"
@@ -195,8 +196,10 @@ export default function Login({ history }) {
               placeholder="密码"
             />
           </Form.Item>
-
           <Form.Item>
+            <Button type="primary" htmlType="submit">
+              <Link to="/news">进入游客系统</Link>
+            </Button>
             <Button type="primary" htmlType="submit" style={{ float: 'right' }}>
               登录
             </Button>
@@ -204,7 +207,6 @@ export default function Login({ history }) {
         </Form>
       </div>
     </div>
-
   );
 };
 
