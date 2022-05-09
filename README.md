@@ -70,29 +70,29 @@ npm start
 
 ### users
 
-![image-20220508180811573](C:\Users\FengXiao7\AppData\Roaming\Typora\typora-user-images\image-20220508180811573.png)
+![image-20220508180811573](https://picture-feng.oss-cn-chengdu.aliyuncs.com/img/image-20220508180811573.png)
 
 ### roles
 
-![image-20220508181121337](C:\Users\FengXiao7\AppData\Roaming\Typora\typora-user-images\image-20220508181121337.png)
+![image-20220508181121337](https://picture-feng.oss-cn-chengdu.aliyuncs.com/img/image-20220508181121337.png)
 
 ### children
 
-![image-20220508181532928](C:\Users\FengXiao7\AppData\Roaming\Typora\typora-user-images\image-20220508181532928.png)
+![image-20220508181532928](https://picture-feng.oss-cn-chengdu.aliyuncs.com/img/image-20220508181532928.png)
 
 
 
 ### rights
 
-![image-20220508182046750](C:\Users\FengXiao7\AppData\Roaming\Typora\typora-user-images\image-20220508182046750.png)
+![image-20220508182046750](https://picture-feng.oss-cn-chengdu.aliyuncs.com/img/image-20220508182046750.png)
 
 ### categories
 
-![image-20220508182150165](C:\Users\FengXiao7\AppData\Roaming\Typora\typora-user-images\image-20220508182150165.png)
+![image-20220508182150165](https://picture-feng.oss-cn-chengdu.aliyuncs.com/img/image-20220508182150165.png)
 
 ### regions:
 
-![image-20220508182337075](C:\Users\FengXiao7\AppData\Roaming\Typora\typora-user-images\image-20220508182337075.png)
+![image-20220508182337075](https://picture-feng.oss-cn-chengdu.aliyuncs.com/img/image-20220508182337075.png)
 
 ### news:
 
