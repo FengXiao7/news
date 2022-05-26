@@ -2,23 +2,9 @@ import React, { useEffect, useState } from 'react'
 import { Table, Popconfirm, Tooltip, Button,notification} from 'antd'
 import axios from 'axios'
 import { Link } from 'react-router-dom';
-import {
-    SoundOutlined,
-    DollarOutlined,
-    ExperimentOutlined,
-    RocketFilled,
-    DribbbleCircleFilled,
-    CalculatorFilled
-} from '@ant-design/icons';
-//key和图标映射表
-const iconList = {
-    "1": <SoundOutlined />,
-    "2": <DollarOutlined />,
-    "3": <ExperimentOutlined />,
-    "4": <RocketFilled />,
-    "5": <DribbbleCircleFilled />,
-    "6": <CalculatorFilled />
-}
+
+import {categoryIconList} from '../../../util/mappingTable'
+
 export default function Audit(props) {
     // 表格数据
     const [dataSource, setDataSource] = useState([])
@@ -37,7 +23,7 @@ export default function Audit(props) {
         {
             title: '新闻分类',
             render(item) {
-                return <span>{iconList[item.categoryId]}{item.category.title}</span>
+                return <span>{categoryIconList[item.categoryId]}{item.category.title}</span>
             },
         },
         {

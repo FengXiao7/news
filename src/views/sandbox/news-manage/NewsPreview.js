@@ -2,27 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { PageHeader, Descriptions } from 'antd';
 import moment from 'moment';
 import axios from 'axios';
-// 审核状态映射表
-const auditList = {
-    0: "未审核",
-    1: '审核中',
-    2: '已通过',
-    3: '未通过'
-}
-// 发布状态映射表
-const publishList = {
-    0: "未发布",
-    1: '待发布',
-    2: '已上线',
-    3: '已下线'
-}
-// 状态颜色表
-const colorState = {
-    0: "red",
-    1: "orange",
-    2: "green",
-    3: "red"
-}
+import {auditList,publishList,colorState} from '../../../util/mappingTable'
+
 const Newspreview = ({ match,history }) => {
     // 新闻信息
     const [NewsInfo, setNewsInfo] = useState(null)
@@ -42,12 +23,12 @@ const Newspreview = ({ match,history }) => {
             >
                 <Descriptions size="small" column={3}>
                     <Descriptions.Item label="创建者">{NewsInfo.author}</Descriptions.Item>
-                    <Descriptions.Item label="创建时间">{moment(NewsInfo.createTime).format("YYYY/MM/DD HH:mm:ss")}</Descriptions.Item>
+                    <Descriptions.Item label="创建时间">{moment(NewsInfo.createTime).format("YYYY/Mo/Do HH:mm:ss")}</Descriptions.Item>
                     <Descriptions.Item label="发布时间">
                         {
 
                             NewsInfo.publishTime ?
-                                moment(NewsInfo.publishTime).format("YYYY/MM/DD HH:mm:ss") :
+                                moment(NewsInfo.publishTime).format("YYYY/Mo/Do HH:mm:ss") :
                                 <span style={{ color: 'red' }}>还未发布！</span>
                         }
 

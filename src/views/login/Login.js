@@ -176,7 +176,7 @@ export default function Login({ history }) {
               {
                 required: true,
                 message: '用户名不能为空',
-              },
+              }
             ]}
           >
             <Input prefix={<UserOutlined />} placeholder="用户名"/>

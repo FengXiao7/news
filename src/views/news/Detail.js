@@ -4,6 +4,7 @@ import moment from 'moment';
 import axios from 'axios';
 import {HeartTwoTone} from '@ant-design/icons'
 const Detail = ({ match,history }) => {
+
     // 新闻信息
     const [NewsInfo, setNewsInfo] = useState(null)
     // 获取新闻信息,访问量+1
@@ -43,7 +44,7 @@ const Detail = ({ match,history }) => {
                 subTitle={
                     <>
                         {NewsInfo.category.title }
-                        <HeartTwoTone twoToneColor="#eb2f96" onClick={()=>handleStar()}/>
+                        <HeartTwoTone twoToneColor="#eb2f96" onClick={handleStar}/>
                     </>
                 }
                 onBack={() => history.goBack()}
@@ -55,7 +56,7 @@ const Detail = ({ match,history }) => {
                         {
 
                             NewsInfo.publishTime ?
-                                moment(NewsInfo.publishTime).format("YYYY/MM/DD HH:mm:ss") :
+                                moment(NewsInfo.publishTime).format("YYYY/Mo/Do HH:mm:ss") :
                                 <span style={{ color: 'red' }}>还未发布！</span>
                         }
 

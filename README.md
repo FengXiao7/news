@@ -188,6 +188,18 @@ const iconList = {
 
 这里的key就是后台导航数组的key喔，很方便就可以取出来
 
+### 默认选中项
+
+因为是路由组件，从location里面拿就行了
+
+```js
+    // 用于展示默认key 数组
+    const selectKeys = [location.pathname]//默认选中的二级权限
+    const openKeys = ["/" + location.pathname.split("/")[1]]//默认展开的一级权限
+```
+
+
+
 ## 3.权限管理
 
 主要是Table组件
@@ -198,7 +210,44 @@ const iconList = {
 
 复杂数据都会用到喔。
 
-columns数组里面的render，
+columns数组配置对象里面的render。
+
+这个render的参数我测试了下：
+
+有dataIndex：
+
+```js
+{
+            title: "权限路径",
+            dataIndex: 'key',
+            width: 200,
+            render: (key,item,index) => {
+                console.log(key)
+                console.log(item)
+                console.log(index)
+                return <Tag color="green">{key}</Tag>
+            }
+        },
+```
+
+![image-20220525161629015](https://picture-feng.oss-cn-chengdu.aliyuncs.com/img/image-20220525161629015.png)
+
+没有dataIndex
+
+```js
+    {
+            title: "权限路径",
+            width: 200,
+            render: (key,item,index) => {
+                console.log(key)
+                console.log(item)
+                console.log(index)
+                return <Tag color="green">测试</Tag>
+            }
+        },
+```
+
+![image-20220525161825269](https://picture-feng.oss-cn-chengdu.aliyuncs.com/img/image-20220525161825269.png)
 
 ### 树形表格：
 
@@ -206,9 +255,9 @@ columns数组里面的render，
 
 我们的datasource里恰好有这个属性喔。就不用自己配置数据了。
 
+如果不需要或配置为其他字段可以用 `childrenColumnName` 进行配置。
 
-
-### Patch：
+### Patch请求：
 
 打补丁喔
 
@@ -244,21 +293,98 @@ rowKey属性来指定key。
 
 加了checkStrictly属性后onCheck里面的参数有变化。
 
-## 用户权限管理状态：
+而且我们的数据恰好有key，title，children。满足treeData的要求
 
-用户权限管理这块，状态有很多，不要绕晕了。我都写了很详细的注释。
+## 用户列表：
 
-## 同步：
+用户列表这块，状态有很多，不要绕晕了。我都写了很详细的注释。
+
+### 添加用户和修改用户
+
+这两个都是Form表单，大部分逻辑是一样的，抽取成一个公共组件，父组件Modal套一个就行了。我用的是ref拿到表单实例，官方提供了个钩子也可以：
+
+![image-20220525201105966](https://picture-feng.oss-cn-chengdu.aliyuncs.com/img/image-20220525201105966.png)
+
+### 表单验证以及错误信息：
+
+validateFields，官方文档写的很清楚。
+
+```jsx
+	表单对象.validateFields().then(value => {
+          //参数value就可以拿到所有表单填写字段了
+        }).catch(err => {
+        //错误信息还要再套一层才拿的到
+            err.errorFields.forEach(e => {
+                message.error(e.errors[0])
+            })
+        })
+```
+
+
+
+### 添加用户：
+
+添加用户成功后，要记得清空表单数据。以免下一次添加用户的时候，还存在上一次的数据。
+
+方法是resetFields。然后就是注意字段要完整
+
+```jsx
+// 是否通过验证
+        addForm.current.validateFields().then(value => {
+            setIsModalVisible(false)
+            // 重置表单
+            addForm.current.resetFields()
+            // 先向后台发请求，id自增
+            axios.post('/users', {
+                ...value,
+                "roleState": true,
+                "default": false,
+            })
+                .then(res => {
+                 // 发完请求后，更新状态。也就是增添一名用户，需要注意dataSource是_expand=role发送的数据，
+                    //我们也必须加上表连接后的属性role
+                    setDataSource([...dataSource, {
+                        ...res.data,
+                        role: roles.filter(item => item.id === +value.roleId)[0]
+                    }])
+                })
+```
+
+
+
+## 修改用户：
+
+修改用户需要拿到用户原始信息。使用setFieldsValue
+
+![image-20220525194329497](https://picture-feng.oss-cn-chengdu.aliyuncs.com/img/image-20220525194329497.png)
+
+![image-20220525194344239](https://picture-feng.oss-cn-chengdu.aliyuncs.com/img/image-20220525194344239.png)
+
+### 发请求更新数据？
+
+- 方案1 先在页面更新，再发送请求更新后台，缺点整理数据麻烦
+
+- 方案2 发送请求更新成功后，再次发送请求得到最新数据,缺点要发两次请求.
+
+  不知道哪种用的多一点。
+
+### useState同步：
 
 useState方法返回的set函数，不像setState一样有第二个回调函数。需要用set函数达到setState第二个回调函数的效果，
 
 直接放在宏任务setTimeout里面就行。
 
-## 表格过滤
+[千锋2022版React全家桶教程_react零基础入门到项目实战完整版_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV1dP4y1c7qd?p=169)  1小时35分开始
+
+
+
+### 表格过滤
 
 官网的参数看的不怎么懂。
 
 有两个属性就行了。都写在columns表格列中。
+
+#### 第一个属性filters:
 
 第一个属性是filters,这个是一个数组，数组里面有很多个对象。
 
@@ -289,15 +415,15 @@ filters: [
     ],
 ```
 
-### text：
+##### text：
 
 ![image-20220505001921580](https://picture-feng.oss-cn-chengdu.aliyuncs.com/img/image-20220505001921580.png)
 
-### value：
+##### value：
 
 这个和第二个属性有关
 
-### 第二个属性
+#### 第二个属性
 
 onFilter,这个属性是一个函数，接收两个参数。在里面写我们的筛选逻辑
 
@@ -309,12 +435,7 @@ onFilter,这个属性是一个函数，接收两个参数。在里面写我们�
  onFilter: (value, item) => item.name.indexOf(value) === 0,
 ```
 
-## 发请求更新数据？
 
-- 方案1 先在页面更新，再发送请求更新后台，缺点整理数据麻烦
-- 方案2 发送请求更新成功后，再次发送请求得到最新数据,缺点要发两次请求.
-
-  不知道哪种用的多一点。
 
 ## 粒子动画
 
@@ -403,18 +524,20 @@ onFilter,这个属性是一个函数，接收两个参数。在里面写我们�
 ```js
 // 本地路由表映射
 const LocalRouterMap = {
-    "/home":Home,
-    "/user-manage/list":UserList,
-    "/right-manage/role/list":RoleList,
-    "/right-manage/right/list":RightList,
-    "/news-manage/add":NewsAdd,
-    "/news-manage/draft":NewsDraft,
-    "/news-manage/category":NewsCategory,
-    "/audit-manage/audit":Audit,
-    "/audit-manage/list":AuditList,
-    "/publish-manage/unpublished":Unpublished,
-    "/publish-manage/published":Published,
-    "/publish-manage/sunset":Sunset
+    "/home": Home,                               //首页
+    "/user-manage/list": UserList,               //用户列表
+    "/right-manage/role/list": RoleList,         //角色列表
+    "/right-manage/right/list": RightList,       //权限列表
+    "/news-manage/add": NewsAdd,                 //撰写新闻
+    "/news-manage/draft": NewsDraft,             //草稿箱
+    "/news-manage/category": NewsCategory,       //新闻分类
+    "/news-manage/preview/:id": NewsPreview,     //新闻预览   routepermisson
+    "/news-manage/update/:id": NewsUpdate,       //更新新闻   routepermisson
+    "/audit-manage/audit": Audit,                //审核新闻
+    "/audit-manage/list": AuditList,             //审核列表   只能看自己撰写的新闻
+    "/publish-manage/unpublished": Unpublished,  //未发布新闻
+    "/publish-manage/published": Published,		 //已发布新闻
+    "/publish-manage/sunset": Sunset			//已下线新闻
 }
 ```
 
@@ -450,7 +573,9 @@ const LocalRouterMap = {
                 BackRouteList.map(item=>
                     {
                         if(checkRoute(item) && checkUserPermission(item)){
-                            return <Route path={item.key} key={item.id} component={LocalRouterMap[item.key]} exact/> 
+                            return <Route path={item.key} key={item.id} component=
+                                //一定要精确匹配
+                                {LocalRouterMap[item.key]} exact/> 
                          }
                         //  没有权限直接返回null，最终还是去找*，
                         return null

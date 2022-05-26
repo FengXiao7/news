@@ -41,7 +41,6 @@ const Home = () => {
     const renderBarChart = (data) => {
         // 基于准备好的dom，初始化echarts实例
         var myChart = echarts.init(BarChartRef.current);
-
         // 指定图表的配置项和数据
         var option = {
             title: {
@@ -80,7 +79,6 @@ const Home = () => {
             let tempData = newsList.filter(n => n.author === username)
             // 截取标题
             let tempData_1 = _.groupBy(tempData, item => item.category.title)
-
             for (let key in tempData_1) {
                 data.push({
                     name: key,
@@ -88,10 +86,8 @@ const Home = () => {
                 })
             }
         }
-
-
         var myChart;
-        // 没有初始化过，初始化一次.否则直接取值
+        // 没有初始化过，初始化一次.否则直接取值,避免重复初始化
         if (!pieChatInit) {
             myChart = echarts.init(PieChartRef.current);
             setPieChatInit(myChart)
@@ -122,7 +118,7 @@ const Home = () => {
             ]
         };
 
-        option && myChart.setOption(option);
+        myChart.setOption(option);
     }
     //获得最多访问列表
     useEffect(() => {
@@ -143,6 +139,7 @@ const Home = () => {
         axios.get("/news?publishState=2&_expand=category")
             .then(res => {
                 setNewsList(res.data)
+                // 以category.title分组
                 renderBarChart(_.groupBy(res.data, item => item.category.title))
             })
         // 销毁 window.onresize方法
@@ -153,7 +150,7 @@ const Home = () => {
 
     return (
         <>
-            {/* 三张卡片 */}
+            {/* 三张卡片，水平间隔16px */}
             <Row gutter={16}>
                 <Col span={8}>
                     <Card title="用户最常浏览" bordered>
@@ -206,7 +203,7 @@ const Home = () => {
             </Row>
             {/* 抽屉 */}
             <Drawer title={`${username}发布的新闻`} placement="right" onClose={onClose} visible={visible} width="500px">
-                {/*  为 Bar 准备一个定义了宽高的 DOM  */}
+                {/*  为 Pie 准备一个定义了宽高的 DOM  */}
                 <div ref={PieChartRef} style={{ width: '100%', height: "400px" }} />
             </Drawer>
             {/*  为 Bar 准备一个定义了宽高的 DOM  */}

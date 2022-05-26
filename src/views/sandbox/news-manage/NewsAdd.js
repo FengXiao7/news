@@ -2,27 +2,12 @@ import React, { useState, useEffect, useRef } from 'react'
 import { PageHeader, Steps, Button, Form, Input, Select, message,notification } from 'antd';
 import NewsEditor from '../../../components/news-manage/NewsEditor'
 import axios from 'axios';
-import {
-    SoundOutlined,
-    DollarOutlined,
-    ExperimentOutlined,
-    RocketFilled,
-    DribbbleCircleFilled,
-    CalculatorFilled
-} from '@ant-design/icons';
 
+import {categoryIconList} from '../../../util/mappingTable'
 const { Step } = Steps;
 const { Option } = Select
 
-//key和图标映射表
-const iconList = {
-    "1": <SoundOutlined />,
-    "2": <DollarOutlined />,
-    "3": <ExperimentOutlined />,
-    "4": <RocketFilled />,
-    "5": <DribbbleCircleFilled />,
-    "6": <CalculatorFilled />
-}
+
 export default function NewsAdd(props) {
     // 步骤条
     const [current, setCurrent] = useState(0)
@@ -73,7 +58,7 @@ export default function NewsAdd(props) {
             })
             // 步骤1的富文本数据校验下是不是为空
         } else {
-            if (editorData === '' || editorData === '') {
+            if ( editorData === '') {
                 message.warning("新闻内容不能为空！")
             } else {
                 setCurrent(current + 1)
@@ -149,7 +134,7 @@ export default function NewsAdd(props) {
                     <Select>
                         {
                             categories.map(c => {
-                                return <Option value={c.id} key={c.id}>{iconList[c.id]} {c.value}</Option>
+                                return <Option value={c.id} key={c.id}>{categoryIconList[c.id]} {c.value}</Option>
                             })
                         }
                     </Select>
@@ -165,7 +150,7 @@ export default function NewsAdd(props) {
                 </NewsEditor>
             </div>
 
-            {/* 步骤2保存草稿箱或者提交审核以及其他按钮 */}
+            {/* 步骤2保存草稿箱或者提交审核以及上下页按钮 */}
             <div style={{ marginTop: '100px' }}>
                 {
                     current === 2 &&

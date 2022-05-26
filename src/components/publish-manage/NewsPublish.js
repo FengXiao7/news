@@ -1,24 +1,12 @@
-import React from 'react';
+import React,{useState,useEffect} from 'react';
 import {Table } from 'antd';
 import { Link } from 'react-router-dom';
-import {
-    SoundOutlined,
-    DollarOutlined,
-    ExperimentOutlined,
-    RocketFilled,
-    DribbbleCircleFilled,
-    CalculatorFilled
-} from '@ant-design/icons';
-//key和图标映射表
-const iconList = {
-    "1": <SoundOutlined />,
-    "2": <DollarOutlined />,
-    "3": <ExperimentOutlined />,
-    "4": <RocketFilled />,
-    "5": <DribbbleCircleFilled />,
-    "6": <CalculatorFilled />
-}
+
+import axios from 'axios';
+import {categoryIconList} from '../../util/mappingTable'
+
 const Newspublish = (props) => {
+    const [categories, setCategories] = useState([]);
     const columns=[
         {
             title:"新闻标题",
@@ -34,7 +22,18 @@ const Newspublish = (props) => {
         {
             title: '新闻分类',
             render(item) {
-                return <span>{iconList[item.categoryId]}{item.category.title}</span>
+                return <span>{categoryIconList[item.categoryId]}{item.category.title}</span>
+            },
+            filters:[
+                ...categories.map(c=>{
+                    return{
+                        text:c.title,
+                        value:c.value
+                    }
+                })
+            ],
+            onFilter:(value,item)=>{
+                return item.category.title===value
             }
         },
         {
@@ -49,6 +48,11 @@ const Newspublish = (props) => {
             }
         }
     ]
+
+    useEffect(() => {
+        axios.get("/categories").then(res=>setCategories(res.data))
+    }, []);
+    
     return (
         <Table
             dataSource={props.dataSource}

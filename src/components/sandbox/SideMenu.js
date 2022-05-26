@@ -3,14 +3,7 @@ import { withRouter } from 'react-router-dom'
 import axios from 'axios';
 import {connect} from 'react-redux'
 import { Layout, Menu } from 'antd';
-import {
-    UserOutlined,
-    HomeOutlined,
-    LockOutlined,
-    FormOutlined,
-    CheckOutlined,
-    DesktopOutlined
-} from '@ant-design/icons';
+import {SideMenuIconList} from '../../util/mappingTable'
 
 const { Sider } = Layout;
 // 映射状态至props
@@ -29,15 +22,8 @@ function getItem(label, key, icon, children, type) {
         type,
     };
 }
-//key和图标映射表
-const iconList = {
-    "/home": <HomeOutlined />,
-    "/user-manage": <UserOutlined />,
-    "/right-manage": <LockOutlined />,
-    "/news-manage": <DesktopOutlined />,
-    "/audit-manage": <FormOutlined />,
-    "/publish-manage": <CheckOutlined />
-}
+
+
 
 //普通组件，用withRouter包一下，顺便拿一下location和history还有redux中的isCollapsed
 function SideMenu({ location, history,isCollapsed }) {
@@ -48,6 +34,7 @@ function SideMenu({ location, history,isCollapsed }) {
     //因为只有两级，就不用递归了
     const renderMenu = (menu) => {
         let menuList = []
+   
         menu.forEach(m => {
             //有第二级
             if (m.children.length > 0 && changeMenuAuthority(m)) {
@@ -58,11 +45,13 @@ function SideMenu({ location, history,isCollapsed }) {
                         children.push(getItem(c.title, c.key))
                     }
                 })
-                menuList.push(getItem(m.title, m.key, iconList[m.key], children))
+                // 一级权限才有icon喔
+                menuList.push(getItem(m.title, m.key, SideMenuIconList[m.key], children))
             } else {
-                changeMenuAuthority(m) && menuList.push(getItem(m.title, m.key, iconList[m.key]))
+                changeMenuAuthority(m) && menuList.push(getItem(m.title, m.key, SideMenuIconList[m.key]))
             }
         })
+
         return menuList;
     }
     // 检查侧边栏菜单权限
@@ -70,15 +59,11 @@ function SideMenu({ location, history,isCollapsed }) {
     const changeMenuAuthority = (item) => {
         return item.pagepermisson && rights.includes(item.key)
     }
-    //跳转路由
-    const go = (e) => {
-        history.push(e.key)
-    }
     // 用于展示默认key 数组
-    const selectKeys = [location.pathname]
-    const openKeys = ["/" + location.pathname.split("/")[1]]
+    const selectKeys = [location.pathname]//默认选中的二级权限
+    const openKeys = ["/" + location.pathname.split("/")[1]]//默认展开的一级权限
 
-    // 获取侧边栏数据
+    // 获取侧边栏数据，right内嵌children
     useEffect(() => {
         axios.get("/rights?_embed=children")
             .then(res => setMenu(res.data))
@@ -96,12 +81,15 @@ function SideMenu({ location, history,isCollapsed }) {
                 }} >
                     新闻管理系统
                 </div>
-                <div style={{ flex: 1, "overflow": "auto" }}>
+                {/* 这个样式主要是为了滚动条 */}
+                <div style={{  "overflow": "auto" }}>
                     <Menu
-                        onClick={go}
+                        onClick={(e)=>history.push(e.key)}
                         theme="dark"
                         mode="inline"
+                        // 默认展开
                         defaultOpenKeys={openKeys}
+                        // 默认选中
                         selectedKeys={selectKeys}
                         items={renderMenu(menu)}
                     />

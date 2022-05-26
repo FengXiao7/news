@@ -43,7 +43,6 @@ const LocalRouterMap = {
 }
 
 const NewsRouter=(props)=>{
-
     const [BackRouteList, setBackRouteList] = useState([])
     // 把rights和children直接合并在一起
     //或者查询rights?_embed=children，然后数组扁平化
@@ -53,8 +52,8 @@ const NewsRouter=(props)=>{
             axios.get("/children"),
         ]).then(res => {
             setBackRouteList([...res[0].data, ...res[1].data])
-            // console.log(BackRouteList)
         })
+        
     }, [])
     const { role: { rights } } = JSON.parse(localStorage.getItem("token"))
     // 检查路由，本地得有且pagepermisson为1或者routepermisson为1

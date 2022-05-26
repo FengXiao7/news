@@ -5,7 +5,6 @@ const { Item } = Form
 
 
 const Userfrom = forwardRef((props, ref) => {
-
     // 选择超级管理员时，禁用选择区域
     const [isDisabled, setIsDisabled] = useState(false)
     //所需用户权限
@@ -19,7 +18,7 @@ const Userfrom = forwardRef((props, ref) => {
         }
         //添加用户
         if (props.isAddAuthority) {
-            // 超级管理员随意更改区域,其他人只能添加本区域
+            // 超级管理员随意更改区域,区域管理员只能添加本区域，区域编辑无权限
             return roleId === 1 ? false : region !== regionName
         }
     }
@@ -28,12 +27,12 @@ const Userfrom = forwardRef((props, ref) => {
     
         //更新用户
         if (props.isUpdateAuthority) {
-            //超级管理员随意选择角色，其他人不能更改角色
+            //超级管理员随意选择角色，区域管理员不能更改角色，区域编辑无权限
             return roleId !== 1
         }
         //添加用户
         if (props.isAddAuthority) {
-            // 超级管理员随意选择角色,其他人只能添加区域编辑
+            // 超级管理员随意选择角色,区域管理员只能添加区域编辑，区域编辑无权限
             return roleId === 1 ?false:itemId!==3
         }
     }
@@ -99,7 +98,8 @@ const Userfrom = forwardRef((props, ref) => {
                 ]}
             >
                 <Select style={{ width: 120 }} onChange={(value) => {
-                    // 选中超级管理员，清空region,禁选region
+                    // 选中超级管理员，清空region(相当于全球),禁选region
+                    //其他角色，无限制
                     if (value === 1) {
                         setIsDisabled(true)
                         ref.current.setFieldsValue({

@@ -2,27 +2,12 @@ import React, { useState, useEffect, useRef } from 'react'
 import { PageHeader, Steps, Button, Form, Input, Select, message,notification } from 'antd';
 import NewsEditor from '../../../components/news-manage/NewsEditor'
 import axios from 'axios';
-import {
-    SoundOutlined,
-    DollarOutlined,
-    ExperimentOutlined,
-    RocketFilled,
-    DribbbleCircleFilled,
-    CalculatorFilled
-} from '@ant-design/icons';
+import {categoryIconList} from '../../../util/mappingTable'
+
 
 const { Step } = Steps;
 const { Option } = Select
 
-//key和图标映射表
-const iconList = {
-    "1": <SoundOutlined />,
-    "2": <DollarOutlined />,
-    "3": <ExperimentOutlined />,
-    "4": <RocketFilled />,
-    "5": <DribbbleCircleFilled />,
-    "6": <CalculatorFilled />
-}
 // 这个地方大部分都和NewsAdd相似,可以考虑抽取成一个组件.这里就不抽取了
 export default function NewsUpdate(props) {
     // 步骤条
@@ -65,7 +50,7 @@ export default function NewsUpdate(props) {
             })
             // 步骤1的富文本数据校验下是不是为空
         } else {
-            if (editorData === '' || editorData === '') {
+            if (editorData === '') {
                 message.warning("新闻内容不能为空！")
             } else {
                 setCurrent(current + 1)
@@ -85,7 +70,7 @@ export default function NewsUpdate(props) {
     useEffect(() => {
         axios.get("/categories").then(res => setCategories(res.data))
     }, [])
-    // 获取新闻信息,用于更新新闻
+    // 获取新闻信息包括新闻标题，分类以及内容,用于更新新闻
     useEffect(() => {
         axios.get(`news/${props.match.params.id}?_expand=category&_expand=role`)
             .then(res => {
@@ -154,7 +139,7 @@ export default function NewsUpdate(props) {
                     <Select>
                         {
                             categories.map(c => {
-                                return <Option value={c.id} key={c.id}>{iconList[c.id]} {c.value}</Option>
+                                return <Option value={c.id} key={c.id}>{categoryIconList[c.id]} {c.value}</Option>
                             })
                         }
                     </Select>

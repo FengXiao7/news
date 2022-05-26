@@ -29,6 +29,9 @@ export default function NewsEditor(props) {
                 onBlur={()=>{
                     props.getContent(draftToHtml(convertToRaw(editorState.getCurrentContent())))
                 }}
+                localization={{
+                    locale:'zh'
+                }}
             />
         </div>
     )

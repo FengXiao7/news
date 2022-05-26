@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Table, Switch, Button, Popconfirm, Modal, message } from 'antd';
+import { Table, Switch, Button, Popconfirm, Modal, message, Tooltip, Input, Row, Col } from 'antd';
 import {
     DeleteOutlined,
     EditTwoTone
@@ -7,13 +7,15 @@ import {
 import axios from 'axios';
 import Userfrom from '../../../components/user-manage/UserFrom'
 
-
+const { Search } = Input;
 export default function UserList() {
     // 表格数据源
     const [dataSource, setDataSource] = useState([])
+    // 原始表格数据源，用于重置用户名
+    const CurrentDataSource = useRef(null)
     // 获取roles数据
     const [roles, setRoles] = useState([])
-    //获取当前选择的那一行数据,在打开编辑按钮时设置
+    //获取当前选择的那一行数据,在打开编辑按钮时设置,主要是为了检查是否修改了用户信息以及拿到用户id用于修改
     const [currentData, setCurrentData] = useState([])
     // region数据
     const [regionData, setRegionData] = useState([])
@@ -74,13 +76,13 @@ export default function UserList() {
             },
             render: (role) => {
                 return role.roleName
-            }
+            },
         },
         {
+            filterSearch: true,
             title: "用户名",
             dataIndex: 'username',
             width: 100,
-
         },
         {
             title: "用户状态",
@@ -106,13 +108,19 @@ export default function UserList() {
                             cancelText="否"
                             onConfirm={() => deleteMethod(item)}
                         >
-                            <Button danger shape="circle" icon={<DeleteOutlined />} />
+                            <Tooltip placement="bottomLeft" title={<span>删除用户</span>} color={"red"}>
+
+                                <Button danger shape="circle" icon={<DeleteOutlined />} />
+                            </Tooltip>
                         </Popconfirm>
                         {/* 编辑按钮 */}
-                        <Button
-                            type="primary" shape="circle" icon={<EditTwoTone />}
-                            onClick={() => handleUpdate(item)}
-                        />
+                        <Tooltip placement="bottomLeft" title={<span>编辑用户信息</span>} color={"blue"}>
+                            <Button
+                                type="primary" shape="circle" icon={<EditTwoTone />}
+                                onClick={() => handleUpdate(item)}
+                            />
+                        </Tooltip>
+
                     </>
                 )
             }
@@ -134,7 +142,7 @@ export default function UserList() {
             item.roleId === 1 ? setIsUpdateDisabled(true) : setIsUpdateDisabled(false)
             // 把选中的item,赋值给表单
             updateForm.current.setFieldsValue(item)
-            //把选中的item保存下来，以后方便修改
+            //把选中的item保存下来，以后方便操作
             setCurrentData(item)
         }, 0)
     }
@@ -158,7 +166,7 @@ export default function UserList() {
                 "default": false,
             })
                 .then(res => {
-                    // 发完请求后，更新状态。需要注意dataSource是表连接后发送的数据，
+                    // 发完请求后，更新状态。也就是增添一名用户，需要注意dataSource是_expand=role发送的数据，
                     //我们也必须加上表连接后的属性role
                     setDataSource([...dataSource, {
                         ...res.data,
@@ -209,17 +217,25 @@ export default function UserList() {
             })
         })
     }
+    // 搜索用户名回调
+    const onSearch = (value) => {
+        setDataSource([...dataSource.filter(d => {
+            return d.username.indexOf(value) !== -1
+        })])
+    }
     //获取user数据
     //这里面要做一下权限分配
     useEffect(() => {
         axios.get("/users?_expand=role").then(res => {
             let list = res.data
             // 超级管理员可以看到所有用户
-            setDataSource(roleId === 1 ? list : [
+            list = roleId === 1 ? list : [
                 // 区域管理员可以看到自己以及和自己同一区域以及区域编辑
                 ...list.filter(item => item.username === username),
                 ...list.filter(item => item.region === region && item.roleId === 3)
-            ])
+            ]
+            setDataSource(list)
+            CurrentDataSource.current = list
         })
     }, [roleId, region, username])
     //获取roles数据
@@ -237,9 +253,21 @@ export default function UserList() {
 
     return (
         <>
-            <Button type="primary" onClick={() => setIsModalVisible(true)}>
-                添加用户
-            </Button>
+            <Row>
+                <Col span={3}>
+                    <Button type="primary" onClick={() => setIsModalVisible(true)}>
+                        添加用户
+                    </Button>
+                </Col>
+                <Col span={10} offset={8}>
+                    <Search placeholder="搜索用户名" onSearch={onSearch} enterButton />
+                </Col>
+                <Col span={3}>
+                    <Button type="primary" onClick={() => setDataSource(CurrentDataSource.current)}>
+                        重置
+                    </Button>
+                </Col>
+            </Row>
             <Table
                 dataSource={dataSource}
                 columns={columns}
@@ -249,6 +277,9 @@ export default function UserList() {
                     pageSize: 5
                 }}
             />
+
+
+
             {/* 添加用户Modal，里面套个Form */}
             <Modal
                 visible={isModalVisible}
@@ -256,7 +287,7 @@ export default function UserList() {
                 okText="确认"
                 cancelText="取消"
                 onCancel={() => setIsModalVisible(false)}
-                onOk={() => addFormOk()}
+                onOk={addFormOk}
             >
                 {/* 传个子项的四个属性为：
                    1. ref：我们需要拿到表格ref，
@@ -285,6 +316,5 @@ export default function UserList() {
                 <Userfrom ref={updateForm} roles={roles} regionData={regionData} isUpdateDisabled={isUpdateDisabled} isUpdateAuthority={true} />
             </Modal>
         </>
-
     )
 }

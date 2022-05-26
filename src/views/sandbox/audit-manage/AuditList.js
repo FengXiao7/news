@@ -2,37 +2,9 @@ import React, { useState, useEffect } from 'react'
 import { Table, Button, Tag, Popconfirm, Tooltip, notification } from 'antd'
 import { Link } from 'react-router-dom'
 import axios from 'axios'
-import {
-    SoundOutlined,
-    DollarOutlined,
-    ExperimentOutlined,
-    RocketFilled,
-    DribbbleCircleFilled,
-    CalculatorFilled
-} from '@ant-design/icons';
-//key和图标映射表
-const iconList = {
-    "1": <SoundOutlined />,
-    "2": <DollarOutlined />,
-    "3": <ExperimentOutlined />,
-    "4": <RocketFilled />,
-    "5": <DribbbleCircleFilled />,
-    "6": <CalculatorFilled />
-}
-// 审核状态映射表
-const auditList = {
-    0: "未审核",
-    1: '审核中',
-    2: '已通过',
-    3: '未通过'
-}
-// 状态颜色表
-const colorState = {
-    0: "red",
-    1: "orange",
-    2: "green",
-    3: "red"
-}
+
+import {categoryIconList,auditList,colorState} from '../../../util/mappingTable'
+
 export default function AuditList(props) {
     //表格数据源
     const [dataSource, setDataSource] = useState([])
@@ -52,7 +24,7 @@ export default function AuditList(props) {
         {
             title: '新闻分类',
             render(item) {
-                return <span>{iconList[item.categoryId]}{item.category.title}</span>
+                return <span>{categoryIconList[item.categoryId]}{item.category.title}</span>
             }
         },
         {

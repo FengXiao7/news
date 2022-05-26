@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react'
-import { Table, Tag, Button, Popconfirm, Popover, Switch } from 'antd';
+import { Table, Tag, Button, Popconfirm, Switch, Tooltip } from 'antd';
 import {
-    DeleteOutlined,
-    EditOutlined
+    DeleteOutlined
 } from '@ant-design/icons';
 import axios from 'axios';
 
@@ -13,6 +12,7 @@ export default function RightList() {
         {
             title: 'ID',
             dataIndex: 'id',
+            width: 100,
             render: (id) => {
                 return <b>{id}</b>
             }
@@ -20,19 +20,18 @@ export default function RightList() {
         {
             title: '权限名称',
             dataIndex: 'title',
-            width:150
+            width: 150
         },
         {
             title: "权限路径",
-            dataIndex: 'key',
-            width:200,
-            render: (key) => {
-                return <Tag color="green">{key}</Tag>
+            width: 200,
+            render: (item) => {
+                return <Tag color={item.grade===1?"green":"orange"}>{item.key}</Tag>
             }
         },
         {
             title: '操作',
-            width:150,
+            width: 150,
             // 这里的item就是一整行的数据喔
             render: (item) => {
                 return (
@@ -44,22 +43,22 @@ export default function RightList() {
                             cancelText="否"
                             onConfirm={() => deleteMethod(item)}
                         >
-                            <Button danger shape="circle" icon={<DeleteOutlined />} />
+                            <Tooltip placement="bottomLeft" title={<span>删除权限</span>} color={"red"}>
+                                <Button danger shape="circle" icon={<DeleteOutlined />} />
+                            </Tooltip>
                         </Popconfirm>
 
                         {/* 编辑 */}
-                        <Popover
-                            content={
-                                <div
-                                    style={{ textAlign: "center" }}>
-                                    <Switch checked={item.pagepermisson} onChange={() => switchMethod(item)}></Switch>
-                                </div>
-                            }
-                            title="页面配置项"
-                            trigger={item.pagepermisson === undefined ? '' : 'click'}>
-                            <Button type="primary" shape="circle" icon={<EditOutlined />} disabled={item.pagepermisson === undefined} />
-                        </Popover>
-
+                        <Tooltip
+                            placement="bottomLeft"
+                            title={item.pagepermisson === undefined ? <span>该权限不可操作是否在侧边栏可见！</span> : <span>配置是否在侧边栏可见</span>}
+                            color={item.pagepermisson === undefined ? "red" : "blue"}>
+                            <Switch
+                                checked={item.pagepermisson}
+                                onChange={() => switchMethod(item)}
+                                disabled={item.pagepermisson === undefined}
+                            ></Switch>
+                        </Tooltip>
                     </div>
                 )
             }
@@ -92,7 +91,7 @@ export default function RightList() {
         item.pagepermisson = item.pagepermisson === 1 ? 0 : 1
 
         setDataSource([...dataSource])
-
+        // 相比于删除要简单很多，直接打补丁就行
         if (item.grade === 1) {
             axios.patch(`/rights/${item.id}`, {
                 pagepermisson: item.pagepermisson
@@ -118,12 +117,13 @@ export default function RightList() {
                 setDataSource(list)
             })
     }, [])
+
     return (
         <Table
             dataSource={dataSource}
             columns={columns}
-            indentSize={40}
-            scroll={{y:600}}
+            indentSize={20}
+
             pagination={{
                 pageSize: 5
             }}

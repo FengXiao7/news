@@ -9,6 +9,7 @@ export default function IndexRouter() {
         <BrowserRouter>
             <Switch>
                 <Route path="/login" component={Login}/>
+                {/* 下面两个路径为：游客系统 */}
                 <Route path="/news" component={News}/>
                 <Route path="/detail/:id" component={Details}/>
                 <Route path="/" render={()=>

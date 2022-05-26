@@ -6,23 +6,9 @@ import {
     DeleteOutlined,
     EditTwoTone,
     UploadOutlined,
-    SoundOutlined,
-    DollarOutlined,
-    ExperimentOutlined,
-    RocketFilled,
-    DribbbleCircleFilled,
-    CalculatorFilled
 } from '@ant-design/icons';
+import {categoryIconList} from '../../../util/mappingTable'
 
-//key和图标映射表
-const iconList = {
-    "1": <SoundOutlined />,
-    "2": <DollarOutlined />,
-    "3": <ExperimentOutlined />,
-    "4": <RocketFilled />,
-    "5": <DribbbleCircleFilled />,
-    "6": <CalculatorFilled />
-}
 
 export default function NewsDraft({ history }) {
     //表格数据源
@@ -50,7 +36,7 @@ export default function NewsDraft({ history }) {
         {
             title: '新闻分类',
             render(item) {
-                return <span>{iconList[item.categoryId]}{item.category.title}</span>
+                return <span>{categoryIconList[item.categoryId]}{item.category.title}</span>
             },
         },
         {

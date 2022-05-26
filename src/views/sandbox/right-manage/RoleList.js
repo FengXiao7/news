@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Table, Button, Popconfirm, Modal, Tree } from 'antd'
+import { Table, Button, Popconfirm, Modal, Tree, Tooltip } from 'antd'
 import axios from 'axios'
 import {
     DeleteOutlined,
@@ -43,20 +43,25 @@ export default function RoleList() {
                             cancelText="否"
                             onConfirm={() => deleteMethod(item)}
                         >
-                            <Button danger shape="circle" icon={<DeleteOutlined />} />
+                            <Tooltip placement="bottomLeft" title={<span>删除角色</span>} color={"red"}>
+                                <Button danger shape="circle" icon={<DeleteOutlined />} />
+                            </Tooltip>
                         </Popconfirm>
 
                         {/* 编辑按钮 */}
-                        <Button
-                            type="primary" shape="circle" icon={<EditTwoTone />}
-                            onClick={() => {
-                                setIsModalVisible(true)
-                                // 获取当前权限数组
-                                setCurrentRight(item.rights)
-                                // 获取当前权限数组的id
-                                setCurrentID(item.id)
-                            }}
-                        />
+                        <Tooltip placement="bottomLeft" title={<span>权限分配</span>} color={"blue"}>
+                            <Button
+                                type="primary" shape="circle" icon={<EditTwoTone />}
+                                onClick={() => {
+                                    setIsModalVisible(true)
+                                    // 获取当前权限数组
+                                    setCurrentRight(item.rights)
+                                    // 获取当前权限数组的id
+                                    setCurrentID(item.id)
+                                }}
+                            />
+                        </Tooltip>
+
 
                     </div>
                 )
@@ -81,7 +86,7 @@ export default function RoleList() {
         setDataSource(dataSource.filter(d => d.id !== item.id))
         axios.delete(`/roles/${item.id}`)
     }
-    //更改权限回调,树形组件使用.每点一次树形组件，都会触发该回调
+    //更改权限onCheck回调,树形组件使用.每点一次树形组件，都会触发该回调
     //保证currentRight都是最新的
     const checkRight = (checkedKeys) => {
         setCurrentRight(checkedKeys.checked)
@@ -90,11 +95,11 @@ export default function RoleList() {
     const modalOnOK = () => {
         setIsModalVisible(false)
         let flag = false
-        
+
         let newDataSource = dataSource.map(d => {
             // id相等，且数据改变
-            if (d.id === currentID && d.rights.toString()!== currentRight.toString()) {
-                flag=true
+            if (d.id === currentID && d.rights.toString() !== currentRight.toString()) {
+                flag = true
                 d.rights = currentRight
             }
             return d

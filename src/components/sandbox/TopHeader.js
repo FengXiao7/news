@@ -3,8 +3,7 @@ import { withRouter } from 'react-router-dom'
 import { Layout, Menu, Dropdown, Avatar } from 'antd';
 import {
     MenuUnfoldOutlined,
-    MenuFoldOutlined,
-    UserOutlined,
+    MenuFoldOutlined
 } from '@ant-design/icons';
 import {connect} from 'react-redux'
 
@@ -59,7 +58,7 @@ const TopHeader = (props) => {
             <div style={{ float: 'right' }}>
                 <span>欢迎<span style={{ color: "#1890ff" }}>{roleName}:{username}</span></span>
                 <Dropdown overlay={menu}>
-                    <Avatar style={{ backgroundColor: '#87d068' }} icon={<UserOutlined />} />
+                    <Avatar src="https://joeschmoe.io/api/v1/random" />
                 </Dropdown>
 
             </div>

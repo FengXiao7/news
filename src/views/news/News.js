@@ -11,7 +11,7 @@ const News = (props) => {
         axios.get('/news?publishState=2&_expand=category')
             .then(res => {
                 // setNewsList(res.data)
-                let tempData = _.groupBy(res.data, item => item.category.title)
+                let tempData =_.groupBy(res.data, item=>item.category.title)
                 setNewsList(Object.entries(tempData))
             })
     }, [])
@@ -21,7 +21,7 @@ const News = (props) => {
                 title="全球大新闻!"
                 onBack={() => props.history.goBack()}
             />,
-            {/* card套List */}
+            {/* card套List,各列上下间距16px */}
             <Row gutter={[16, 16]}>
                 {
                     newsList.length > 0 &&
